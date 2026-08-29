@@ -5,6 +5,8 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\PublicSearchController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -56,6 +58,13 @@ Route::middleware('auth')->group(function () {
 
     // Kategori
     Route::resource('categories', CategoryController::class);
+
+    // Roles & Permissions CRUD
+    Route::resource('roles', RoleController::class);
+    Route::post('/roles/permissions/store', [RoleController::class, 'storePermission'])->name('roles.storePermission');
+
+    // Users CRUD
+    Route::resource('users', UserController::class);
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

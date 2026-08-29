@@ -1,4 +1,4 @@
-﻿@extends('layouts.app2')
+@extends('layouts.app2')
 
 @section('title', 'Upload Dokumen')
 
@@ -352,6 +352,15 @@
     .info-card { position: static; }
     .form-row-2 { grid-template-columns: 1fr; }
   }
+
+  /* Toggle Switch */
+  .switch-wrap { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+  .switch-wrap input { opacity: 0; width: 0; height: 0; position: absolute; pointer-events: none; }
+  .switch-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #dadce0; transition: background-color .2s ease; border-radius: 26px; }
+  .switch-slider::before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: #ffffff; transition: transform .2s ease; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+  .switch-wrap input:checked + .switch-slider { background-color: #1a73e8; }
+  .switch-wrap input:checked + .switch-slider::before { transform: translateX(22px); }
+  .switch-wrap.orange input:checked + .switch-slider { background-color: #e37400; }
 </style>
 @endpush
 
@@ -509,6 +518,42 @@
             </label>
             <input type="text" name="perihal" id="perihal" class="field-input {{ $errors->has('perihal') ? 'is-error' : '' }}" placeholder="Contoh: Permohonan Data OSCE Mahasiswa" value="{{ old('perihal') }}" required>
             @error('perihal') <div class="field-error-msg">⚠ {{ $message }}</div> @enderror
+          </div>
+
+          {{-- Akses Publik Toggle --}}
+          <div class="field-group" style="background:#f8f9fa;border:1.5px solid #e8eaed;border-radius:12px;padding:16px 20px;margin-bottom:14px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+              <div>
+                <div style="font-size:13.5px;font-weight:600;color:#202124;display:flex;align-items:center;gap:6px">
+                  🌐 Akses Publik (Dapat dicari tanpa login)
+                </div>
+                <div style="font-size:12px;color:#70757a;margin-top:2px">
+                  Jika dicentang, dokumen ini dapat dicari & dibuka oleh pengunjung publik.
+                </div>
+              </div>
+              <label class="switch-wrap">
+                <input type="checkbox" name="is_public" value="1" {{ old('is_public', '1') ? 'checked' : '' }}>
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          {{-- Rahasia / Khusus Pengupload Toggle --}}
+          <div class="field-group" style="background:#fffbf5;border:1.5px solid #fde7b0;border-radius:12px;padding:16px 20px;margin-bottom:22px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+              <div>
+                <div style="font-size:13.5px;font-weight:600;color:#e37400;display:flex;align-items:center;gap:6px">
+                  🔐 Dokumen Rahasia (Hanya Saya yang dapat melihat)
+                </div>
+                <div style="font-size:12px;color:#7c3e00;margin-top:2px">
+                  Jika dicentang, dokumen ini hanya dapat dilihat, dicari, & diunduh oleh Anda sendiri (dan Super Admin). Admin lain tidak dapat melihatnya.
+                </div>
+              </div>
+              <label class="switch-wrap orange">
+                <input type="checkbox" name="is_private_to_uploader" value="1" {{ old('is_private_to_uploader') ? 'checked' : '' }}>
+                <span class="switch-slider"></span>
+              </label>
+            </div>
           </div>
 
           <div class="form-section-divider"></div>

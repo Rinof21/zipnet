@@ -1,4 +1,4 @@
-﻿@extends('layouts.app2')
+@extends('layouts.app2')
 
 @section('title', 'Dashboard')
 
@@ -239,12 +239,21 @@
       </div>
     </a>
 
-    <a href="#" data-bs-toggle="modal" data-bs-target="#modalUsers" class="stat-card">
+    <a href="{{ route('users.index') }}" class="stat-card">
       <div class="stat-icon purple">👥</div>
       <div class="stat-body">
         <div class="stat-label">Total Pengguna</div>
         <div class="stat-value purple">{{ \App\Models\User::count() }}</div>
         <div class="stat-trend">Akun terdaftar</div>
+      </div>
+    </a>
+
+    <a href="{{ route('roles.index') }}" class="stat-card">
+      <div class="stat-icon orange">🛡️</div>
+      <div class="stat-body">
+        <div class="stat-label">Peran & Izin</div>
+        <div class="stat-value orange">{{ \Spatie\Permission\Models\Role::count() }}</div>
+        <div class="stat-trend">Role aktif</div>
       </div>
     </a>
   </div>
@@ -265,6 +274,14 @@
     <a href="{{ route('categories.index') }}" class="quick-card">
       <div class="quick-icon">🗂️</div>
       <div class="quick-label">Kelola Kategori</div>
+    </a>
+    <a href="{{ route('users.index') }}" class="quick-card">
+      <div class="quick-icon">👥</div>
+      <div class="quick-label">Kelola User</div>
+    </a>
+    <a href="{{ route('roles.index') }}" class="quick-card">
+      <div class="quick-icon">🛡️</div>
+      <div class="quick-label">Peran & Izin</div>
     </a>
     <a href="{{ route('public.search') }}" class="quick-card" target="_blank">
       <div class="quick-icon">🌐</div>

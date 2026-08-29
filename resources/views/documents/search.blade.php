@@ -359,12 +359,22 @@
       </select>
     </div>
 
+    <div class="search-select-group">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+      <select name="uploader">
+        <option value="">Semua Pengupload</option>
+        @foreach($uploaders as $u)
+          <option value="{{ $u->id }}" {{ $uploader == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
+        @endforeach
+      </select>
+    </div>
+
     <button type="submit" class="btn-search">
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       Cari
     </button>
 
-    @if($q || $category)
+    @if($q || $category || $uploader)
       <a href="{{ route('documents.search') }}" class="btn-reset">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3 21 21"/><path d="M10.5 10.677a2 2 0 0 0 2.823 2.823"/><path d="M7.362 7.561C5.68 8.74 4.279 10.42 3.29 12c1.9 3.05 5.19 6 8.71 6 1.5 0 2.9-.55 4.1-1.38"/><path d="m12 6c4.522 0 7.67 3.65 9.2 6-.64 1.06-1.4 2-2.2 2.77"/></svg>
         Reset
@@ -387,10 +397,12 @@
           <tr>
             <th class="center" style="width:46px">No</th>
             <th style="min-width:160px">Judul</th>
-            <th style="min-width:150px">Nomor Surat</th>
-            <th style="min-width:180px">Perihal</th>
+            <th style="min-width:140px">Nomor Surat</th>
+            <th style="min-width:160px">Perihal</th>
             <th style="min-width:110px">Kategori</th>
-            <th style="min-width:140px">Tags</th>
+            <th style="min-width:85px">Akses</th>
+            <th style="min-width:130px">Pengupload</th>
+            <th style="min-width:130px">Tags</th>
             <th class="center" style="min-width:100px">Tanggal Surat</th>
             <th class="center" style="min-width:80px">Aksi</th>
           </tr>
@@ -418,6 +430,25 @@
                 @else
                   <span style="color:#9aa0a6;font-size:12px">—</span>
                 @endif
+              </td>
+
+              <td>
+                @if($doc->is_private_to_uploader)
+                  <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap" title="Hanya Anda dan Super Admin yang bisa melihat">🔐 Privat Saya</span>
+                @elseif($doc->is_public)
+                  <span style="background:#e8f0fe;color:#1a73e8;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">🌐 Publik</span>
+                @else
+                  <span style="background:#fef3e2;color:#e37400;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">👥 Internal</span>
+                @endif
+              </td>
+
+              <td>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12.5px">
+                  <span style="width:24px;height:24px;border-radius:50%;background:#e8f0fe;color:#1a73e8;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">
+                    {{ strtoupper(substr($doc->uploader->name ?? 'U', 0, 1)) }}
+                  </span>
+                  <span style="white-space:nowrap">{{ $doc->uploader->name ?? '-' }}</span>
+                </div>
               </td>
 
               <td>
@@ -460,7 +491,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="8">
+              <td colspan="10">
                 <div class="empty-state">
                   <div class="empty-icon">🔍</div>
                   <div class="empty-title">Tidak ada dokumen ditemukan</div>
