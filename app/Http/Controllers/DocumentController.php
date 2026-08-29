@@ -95,6 +95,9 @@ class DocumentController extends Controller
         $path = $file->storeAs('documents', $name, 'public');
         $tags = array_map('trim', explode(',', $request->tags));
 
+        $isPrivate = $request->has('is_private_to_uploader') ? true : false;
+        $isPublic = $isPrivate ? false : ($request->has('is_public') ? true : false);
+
         Document::create([
             'title' => $request->title,
             'category_id' => $request->category_id,
@@ -105,8 +108,8 @@ class DocumentController extends Controller
             'file_name' => $name,
             'file_path' => $path,
             'uploaded_by' => Auth::id(),
-            'is_public' => $request->has('is_public') ? true : false,
-            'is_private_to_uploader' => $request->has('is_private_to_uploader') ? true : false,
+            'is_public' => $isPublic,
+            'is_private_to_uploader' => $isPrivate,
         ]);
 
         return redirect()->route('documents.search')->with('success', 'Dokumen berhasil disimpan');
@@ -155,6 +158,9 @@ class DocumentController extends Controller
             'tags' => 'nullable|string',
         ]);
 
+        $isPrivate = $request->has('is_private_to_uploader') ? true : false;
+        $isPublic = $isPrivate ? false : ($request->has('is_public') ? true : false);
+
         $document->update([
             'title' => $request->title,
             'nomor_surat' => $request->nomor_surat,
@@ -162,8 +168,8 @@ class DocumentController extends Controller
             'category_id' => $request->category_id,
             'tanggal_surat' => $request->tanggal_surat,
             'tags' => $request->tags ? explode(',', $request->tags) : [],
-            'is_public' => $request->has('is_public') ? true : false,
-            'is_private_to_uploader' => $request->has('is_private_to_uploader') ? true : false,
+            'is_public' => $isPublic,
+            'is_private_to_uploader' => $isPrivate,
         ]);
 
         return redirect()->route('documents.search')->with('success', 'Dokumen berhasil diperbarui.');

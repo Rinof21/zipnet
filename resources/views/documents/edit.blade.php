@@ -129,6 +129,20 @@
   .switch-wrap input:checked + .switch-slider::before { transform: translateX(22px); }
   .switch-wrap.orange input:checked + .switch-slider { background-color: #e37400; }
 </style>
+<script>
+  // Toggle mutual exclusion
+  const publicToggle  = document.querySelector('input[name="is_public"]');
+  const privateToggle = document.querySelector('input[name="is_private_to_uploader"]');
+  if (publicToggle && privateToggle) {
+    privateToggle.addEventListener('change', function() {
+      if (this.checked) publicToggle.checked = false;
+    });
+    publicToggle.addEventListener('change', function() {
+      if (this.checked) privateToggle.checked = false;
+    });
+  }
+</script>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 @endpush
 
 @section('content')
@@ -378,11 +392,15 @@
   // Submit loading state
   const form    = document.getElementById('editForm');
   const btnSave = document.getElementById('btnSave');
-  if (form && btnSave) {
-    form.addEventListener('submit', () => {
-      btnSave.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin .9s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Menyimpan...';
-      btnSave.disabled = true;
-      btnSave.style.opacity = '.75';
+  // Toggle mutual exclusion
+  const publicToggle  = document.querySelector('input[name="is_public"]');
+  const privateToggle = document.querySelector('input[name="is_private_to_uploader"]');
+  if (publicToggle && privateToggle) {
+    privateToggle.addEventListener('change', function() {
+      if (this.checked) publicToggle.checked = false;
+    });
+    publicToggle.addEventListener('change', function() {
+      if (this.checked) privateToggle.checked = false;
     });
   }
 </script>

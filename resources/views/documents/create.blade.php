@@ -674,6 +674,16 @@
       btnSave.disabled = true;
       btnSave.style.opacity = '.75';
     });
+  // Toggle mutual exclusion
+  const publicToggle  = document.querySelector('input[name="is_public"]');
+  const privateToggle = document.querySelector('input[name="is_private_to_uploader"]');
+  if (publicToggle && privateToggle) {
+    privateToggle.addEventListener('change', function() {
+      if (this.checked) publicToggle.checked = false;
+    });
+    publicToggle.addEventListener('change', function() {
+      if (this.checked) privateToggle.checked = false;
+    });
   }
 </script>
 @endpush
