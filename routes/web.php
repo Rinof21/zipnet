@@ -37,18 +37,19 @@ Route::get('/dashboard', function () {
 // =======================
 Route::middleware('auth')->group(function () {
 
-    // Upload
-    Route::get('/documents/create', [DocumentController::class, 'create'])->name('documents.create');
-    Route::post('/documents/store', [DocumentController::class, 'store'])->name('documents.store');
+    // Upload (memerlukan izin tambah dokumen)
+    Route::get('/documents/create', [DocumentController::class, 'create'])->middleware('permission:tambah dokumen')->name('documents.create');
+    Route::post('/documents/store', [DocumentController::class, 'store'])->middleware('permission:tambah dokumen')->name('documents.store');
 
-    // Download dokumen (misal hanya admin yang boleh)
+    // Download dokumen
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
 
     // View detail internal
     Route::get('/documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
 
-    Route::get('/documents/{id}/edit', [DocumentController::class, 'edit'])->name('documents.edit');
-    Route::put('/documents/{id}', [DocumentController::class, 'update'])->name('documents.update');
+    // Edit dokumen (memerlukan izin edit dokumen)
+    Route::get('/documents/{id}/edit', [DocumentController::class, 'edit'])->middleware('permission:edit dokumen')->name('documents.edit');
+    Route::put('/documents/{id}', [DocumentController::class, 'update'])->middleware('permission:edit dokumen')->name('documents.update');
 
     // Pencarian internal
     Route::get('/search', [DocumentController::class, 'search'])->name('documents.search');
@@ -56,15 +57,15 @@ Route::middleware('auth')->group(function () {
     // Tags
     Route::get('/tags/{tag}', [TagController::class, 'show'])->name('tags.show');
 
-    // Kategori
-    Route::resource('categories', CategoryController::class);
+    // Kategori (memerlukan izin kelola kategori)
+    Route::resource('categories', CategoryController::class)->middleware('permission:kelola kategori');
 
-    // Roles & Permissions CRUD
-    Route::resource('roles', RoleController::class);
-    Route::post('/roles/permissions/store', [RoleController::class, 'storePermission'])->name('roles.storePermission');
+    // Roles & Permissions CRUD (memerlukan izin kelola peran)
+    Route::resource('roles', RoleController::class)->middleware('permission:kelola peran');
+    Route::post('/roles/permissions/store', [RoleController::class, 'storePermission'])->middleware('permission:kelola peran')->name('roles.storePermission');
 
-    // Users CRUD
-    Route::resource('users', UserController::class);
+    // Users CRUD (memerlukan izin kelola pengguna)
+    Route::resource('users', UserController::class)->middleware('permission:kelola pengguna');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

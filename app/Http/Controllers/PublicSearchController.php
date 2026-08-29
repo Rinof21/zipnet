@@ -14,8 +14,7 @@ class PublicSearchController extends Controller
         $documents = [];
 
         if ($q) {
-            $documents = Document::where('is_public', true)
-                ->where(function ($query) use ($q) {
+            $documents = Document::where(function ($query) use ($q) {
                     $query->where('title', 'like', "%$q%")
                         ->orWhere('perihal', 'like', "%$q%")
                         ->orWhere('nomor_surat', 'like', "%$q%");
@@ -29,8 +28,15 @@ class PublicSearchController extends Controller
 
     public function preview(Document $document)
     {
-        if (!$document->is_public && !auth()->check()) {
-            abort(403, 'Dokumen ini bersifat privat dan memerlukan login untuk diakses.');
+        $user = auth()->user();
+        if ($document->is_private_to_uploader) {
+            if (!$user || ($document->uploaded_by !== $user->id && !$user->hasRole('Super Admin'))) {
+                abort(403, 'Dokumen ini bersifat rahasia dan hanya dapat diakses oleh pengupload.');
+            }
+        } elseif (!$document->is_public) {
+            if (!$user) {
+                abort(403, 'Dokumen ini bersifat terbatas dan memerlukan login untuk diakses.');
+            }
         }
 
         return view('public.preview', compact('document'));

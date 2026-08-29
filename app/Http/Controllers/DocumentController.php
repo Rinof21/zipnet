@@ -44,21 +44,20 @@ class DocumentController extends Controller
     {
         $q = $request->q;
         $category = $request->category;
-        $uploader = $request->uploader;
         $user = Auth::user();
+
+        // Default uploader to logged in user if not specified in request
+        if (!$request->has('uploader')) {
+            $uploader = $user ? (string)$user->id : 'all';
+        } else {
+            $uploader = $request->uploader;
+        }
 
         $categories = Category::orderBy('name')->get();
         $uploaders = User::orderBy('name')->get();
 
         $documents = Document::query()
             ->with(['category', 'uploader'])
-            ->where(function ($query) use ($user) {
-                if ($user && $user->hasRole('Super Admin')) {
-                    return;
-                }
-                $query->where('is_private_to_uploader', false)
-                      ->orWhere('uploaded_by', $user ? $user->id : 0);
-            })
             ->when($q, function ($query) use ($q) {
                 $query->where('title', 'like', "%$q%")
                     ->orWhere('nomor_surat', 'like', "%$q%")
@@ -67,7 +66,7 @@ class DocumentController extends Controller
             ->when($category, function ($query) use ($category) {
                 $query->where('category_id', $category);
             })
-            ->when($uploader, function ($query) use ($uploader) {
+            ->when($uploader && $uploader !== 'all', function ($query) use ($uploader) {
                 $query->where('uploaded_by', $uploader);
             })
             ->orderBy('created_at', 'desc')
@@ -134,10 +133,19 @@ class DocumentController extends Controller
         return view('documents.preview', compact('document'));
     }
 
+    protected function authorizeDocumentEdit(Document $document)
+    {
+        $user = Auth::user();
+        if ($user && $document->uploaded_by !== $user->id && !$user->hasRole('Super Admin')) {
+            abort(403, 'Anda hanya dapat mengedit dokumen yang Anda unggah sendiri.');
+        }
+    }
+
     public function edit($id)
     {
         $document = Document::findOrFail($id);
         $this->authorizeDocumentAccess($document);
+        $this->authorizeDocumentEdit($document);
 
         $categories = Category::all();
 
@@ -148,6 +156,7 @@ class DocumentController extends Controller
     {
         $document = Document::findOrFail($id);
         $this->authorizeDocumentAccess($document);
+        $this->authorizeDocumentEdit($document);
 
         $request->validate([
             'title' => 'required',

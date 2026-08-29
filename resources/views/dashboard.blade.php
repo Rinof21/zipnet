@@ -239,6 +239,7 @@
       </div>
     </a>
 
+    @can('kelola pengguna')
     <a href="{{ route('users.index') }}" class="stat-card">
       <div class="stat-icon purple">👥</div>
       <div class="stat-body">
@@ -247,7 +248,9 @@
         <div class="stat-trend">Akun terdaftar</div>
       </div>
     </a>
+    @endcan
 
+    @can('kelola peran')
     <a href="{{ route('roles.index') }}" class="stat-card">
       <div class="stat-icon orange">🛡️</div>
       <div class="stat-body">
@@ -256,6 +259,7 @@
         <div class="stat-trend">Role aktif</div>
       </div>
     </a>
+    @endcan
   </div>
 
   {{-- Quick Actions --}}
@@ -263,26 +267,34 @@
     <div class="section-title">Aksi Cepat</div>
   </div>
   <div class="quick-grid">
+    @can('tambah dokumen')
     <a href="{{ route('documents.create') }}" class="quick-card">
       <div class="quick-icon">📤</div>
       <div class="quick-label">Upload Dokumen</div>
     </a>
+    @endcan
     <a href="/search" class="quick-card">
       <div class="quick-icon">🔍</div>
       <div class="quick-label">Cari Arsip</div>
     </a>
+    @can('kelola kategori')
     <a href="{{ route('categories.index') }}" class="quick-card">
       <div class="quick-icon">🗂️</div>
       <div class="quick-label">Kelola Kategori</div>
     </a>
+    @endcan
+    @can('kelola pengguna')
     <a href="{{ route('users.index') }}" class="quick-card">
       <div class="quick-icon">👥</div>
       <div class="quick-label">Kelola User</div>
     </a>
+    @endcan
+    @can('kelola peran')
     <a href="{{ route('roles.index') }}" class="quick-card">
       <div class="quick-icon">🛡️</div>
       <div class="quick-label">Peran & Izin</div>
     </a>
+    @endcan
     <a href="{{ route('public.search') }}" class="quick-card" target="_blank">
       <div class="quick-icon">🌐</div>
       <div class="quick-label">Halaman Publik</div>

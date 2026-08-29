@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -153,15 +153,32 @@
   <p class="result-meta">Menampilkan hasil untuk: <strong>{{ $q }}</strong></p>
   <div class="result-list">
     @forelse($documents as $doc)
-      <a href="#" class="result-card" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(asset('storage/' . $doc->file_path)) }}); return false;">
-        <div class="result-url">cariarsip › arsip › {{ Str::slug($doc->title) }}</div>
-        <div class="result-title">{{ $doc->title }}</div>
-        <div class="result-snippet">
-          Nomor Surat: <strong>{{ $doc->nomor_surat }}</strong>
-          @if($doc->perihal) &nbsp;·&nbsp; {{ Str::limit($doc->perihal, 120) }} @endif
+      @php
+        $isAccessible = $doc->is_public && !$doc->is_private_to_uploader;
+      @endphp
+      @if($isAccessible)
+        <a href="#" class="result-card" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(asset('storage/' . $doc->file_path)) }}); return false;">
+          <div class="result-url">cariarsip › arsip › {{ Str::slug($doc->title) }}</div>
+          <div class="result-title">{{ $doc->title }}</div>
+          <div class="result-snippet">
+            Nomor Surat: <strong>{{ $doc->nomor_surat }}</strong>
+            @if($doc->perihal) &nbsp;·&nbsp; {{ Str::limit($doc->perihal, 120) }} @endif
+          </div>
+          <div class="result-date">{{ $doc->tanggal_surat ? $doc->tanggal_surat->format('d M Y') : '' }}</div>
+        </a>
+      @else
+        <div class="result-card" onclick="alert('🔒 Dokumen ini bersifat {{ $doc->is_private_to_uploader ? 'Private' : 'Internal' }}.\nFile PDF tidak dapat dibuka tanpa login sebagai pengelola yang berhak.'); return false;" style="opacity:.85">
+          <div class="result-url">cariarsip › arsip › {{ Str::slug($doc->title) }}</div>
+          <div class="result-title" style="color:#5f6368">{{ $doc->title }}</div>
+          <div class="result-snippet">
+            Nomor Surat: <strong>{{ $doc->nomor_surat }}</strong>
+            @if($doc->perihal) &nbsp;·&nbsp; {{ Str::limit($doc->perihal, 120) }} @endif
+          </div>
+          <div class="result-date" style="color:#d93025;font-weight:500;margin-top:4px">
+            🔒 Akses Terbatas ({{ $doc->is_private_to_uploader ? 'Private' : 'Internal' }})
+          </div>
         </div>
-        <div class="result-date">{{ $doc->tanggal_surat->format('d M Y') }}</div>
-      </a>
+      @endif
     @empty
       <p class="no-result">Tidak ada arsip yang sesuai dengan pencarian "<strong>{{ $q }}</strong>".</p>
     @endforelse

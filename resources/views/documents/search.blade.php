@@ -362,9 +362,11 @@
     <div class="search-select-group">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
       <select name="uploader">
-        <option value="">Semua Pengupload</option>
+        <option value="all" {{ $uploader === 'all' ? 'selected' : '' }}>Semua Pengupload</option>
         @foreach($uploaders as $u)
-          <option value="{{ $u->id }}" {{ $uploader == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
+          <option value="{{ $u->id }}" {{ (string)$uploader === (string)$u->id ? 'selected' : '' }}>
+            {{ $u->name }} @if(auth()->id() === $u->id) (Saya) @endif
+          </option>
         @endforeach
       </select>
     </div>
@@ -374,7 +376,7 @@
       Cari
     </button>
 
-    @if($q || $category || $uploader)
+    @if($q || $category || ($uploader && $uploader !== 'all'))
       <a href="{{ route('documents.search') }}" class="btn-reset">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3 21 21"/><path d="M10.5 10.677a2 2 0 0 0 2.823 2.823"/><path d="M7.362 7.561C5.68 8.74 4.279 10.42 3.29 12c1.9 3.05 5.19 6 8.71 6 1.5 0 2.9-.55 4.1-1.38"/><path d="m12 6c4.522 0 7.67 3.65 9.2 6-.64 1.06-1.4 2-2.2 2.77"/></svg>
         Reset
@@ -432,9 +434,18 @@
                 @endif
               </td>
 
+              @php
+                $isOwnDoc = $doc->uploaded_by === auth()->id();
+                $canAccess = !$doc->is_private_to_uploader || $isOwnDoc || auth()->user()->hasRole('Super Admin');
+              @endphp
+
               <td>
                 @if($doc->is_private_to_uploader)
-                  <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap" title="Hanya Anda dan Super Admin yang bisa melihat">🔐 Privat Saya</span>
+                  @if($isOwnDoc)
+                    <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap" title="Dokumen rahasia milik Anda">🔐 Privat Saya</span>
+                  @else
+                    <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap" title="Dokumen rahasia pengupload">🔐 Private</span>
+                  @endif
                 @elseif($doc->is_public)
                   <span style="background:#e8f0fe;color:#1a73e8;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">🌐 Publik</span>
                 @else
@@ -466,27 +477,33 @@
               </td>
 
               <td class="center">
-                <div class="doc-date">{{ $doc->tanggal_surat->format('d M Y') }}</div>
+                <div class="doc-date">{{ $doc->tanggal_surat ? $doc->tanggal_surat->format('d M Y') : '' }}</div>
               </td>
 
               <td class="center">
-                <div class="action-wrap">
-                  <button
-                    class="btn-action btn-view"
-                    title="Preview"
-                    onclick="openDrawer(
-                      {{ json_encode($doc->title) }},
-                      {{ json_encode($doc->nomor_surat) }},
-                      {{ json_encode(asset('storage/' . $doc->file_path)) }},
-                      {{ $doc->id }}
-                    )"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
-                  </button>
-                  <a href="{{ route('documents.edit', $doc->id) }}" class="btn-action btn-edit" title="Edit">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </a>
-                </div>
+                @if($canAccess)
+                  <div class="action-wrap">
+                    <button
+                      class="btn-action btn-view"
+                      title="Preview"
+                      onclick="openDrawer(
+                        {{ json_encode($doc->title) }},
+                        {{ json_encode($doc->nomor_surat) }},
+                        {{ json_encode(asset('storage/' . $doc->file_path)) }},
+                        {{ $doc->id }}
+                      )"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    @if(($isOwnDoc || auth()->user()->hasRole('Super Admin')) && auth()->user()->can('edit dokumen'))
+                    <a href="{{ route('documents.edit', $doc->id) }}" class="btn-action btn-edit" title="Edit Dokumen">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                    @endif
+                  </div>
+                @else
+                  <span style="color:#9aa0a6;font-size:15px;cursor:not-allowed" title="Dokumen privat pengupload — Akses tidak diizinkan">🔒</span>
+                @endif
               </td>
             </tr>
           @empty
