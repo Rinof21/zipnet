@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Preview Dokumen</title>
+  @include('partials.pwa-head')
   <style>
     body {
       margin: 0;
