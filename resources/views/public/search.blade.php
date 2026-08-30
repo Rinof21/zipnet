@@ -20,10 +20,29 @@
     .menu-btn:hover { background: #f1f3f4; }
     .dot-grid { display: grid; grid-template-columns: repeat(3, 4px); gap: 2.5px; }
     .dot-grid span { width: 4px; height: 4px; border-radius: 50%; background: #5f6368; }
-    .dropdown { position: absolute; top: 52px; right: 0; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.18); min-width: 210px; overflow: hidden; display: none; z-index: 200; }
-    .dropdown.open { display: block; }
-    .dropdown a { display: flex; align-items: center; gap: 10px; padding: 12px 16px; font-size: 14px; color: #202124; text-decoration: none; transition: background .12s; }
-    .dropdown a:hover { background: #f1f3f4; }
+    /* GOOGLE APP LAUNCHER POPUP */
+    .dropdown {
+      position: absolute;
+      top: 46px;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 20px;
+      box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 12px 3px rgba(60,64,67,0.15);
+      width: 320px;
+      padding: 14px 10px;
+      display: none;
+      z-index: 200;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .dropdown::-webkit-scrollbar { width: 5px; }
+    .dropdown::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 4px; }
+    .dropdown.open { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 2px; }
+    .app-item { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 10px 4px 8px; border-radius: 14px; text-decoration: none; transition: background .12s; min-height: 86px; }
+    .app-item:hover { background: #e8f0fe; }
+    .app-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.15); flex-shrink: 0; }
+    .app-label { font-size: 12px; font-weight: 400; color: #3c4043; text-align: center; line-height: 1.25; max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .login-btn { font-size: 13px; font-weight: 500; color: #fff; background: #1a73e8; padding: 8px 20px; border-radius: 20px; text-decoration: none; transition: background .15s, box-shadow .15s; }
     .login-btn:hover { background: #1557b0; box-shadow: 0 2px 8px rgba(26,115,232,.4); }
     .user-avatar-btn {
@@ -32,7 +51,7 @@
       background: #1a73e8;
       color: #fff;
       display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700;
+      font-size: 13px; font-weight: 400;
       text-decoration: none;
       transition: background .15s, box-shadow .15s;
       flex-shrink: 0;
@@ -143,13 +162,37 @@
         @for($i=0;$i<9;$i++)<span></span>@endfor
       </div>
     </button>
+    @php
+      $gradients = [
+        'linear-gradient(135deg, #4285f4, #1a73e8)',
+        'linear-gradient(135deg, #34a853, #188038)',
+        'linear-gradient(135deg, #fbbc04, #f9ab00)',
+        'linear-gradient(135deg, #ea4335, #d93025)',
+        'linear-gradient(135deg, #af52de, #8e24aa)',
+        'linear-gradient(135deg, #00897b, #00695c)',
+      ];
+    @endphp
     <div id="menuDropdown" class="dropdown">
-      @forelse($quickLinks ?? [] as $link)
-        <a href="{{ $link->url }}" target="_blank">{{ $link->title }}</a>
+      @forelse($quickLinks ?? [] as $idx => $link)
+        <a href="{{ $link->url }}" target="_blank" class="app-item">
+          <div class="app-icon" style="background: {{ $gradients[$idx % count($gradients)] }}">
+            {{ strtoupper(substr($link->title, 0, 1)) }}
+          </div>
+          <span class="app-label">{{ $link->title }}</span>
+        </a>
       @empty
-        <a href="https://silatfk.untan.ac.id" target="_blank">Silat</a>
-        <a href="http://203.24.51.238:8015" target="_blank">Reservasi Ruang Sidang</a>
-        <a href="https://kedokteran.untan.ac.id" target="_blank">Website Fakultas</a>
+        <a href="https://silatfk.untan.ac.id" target="_blank" class="app-item">
+          <div class="app-icon" style="background: linear-gradient(135deg, #4285f4, #1a73e8)">S</div>
+          <span class="app-label">Silat</span>
+        </a>
+        <a href="http://203.24.51.238:8015" target="_blank" class="app-item">
+          <div class="app-icon" style="background: linear-gradient(135deg, #34a853, #188038)">R</div>
+          <span class="app-label">Reservasi Ruang Sidang</span>
+        </a>
+        <a href="https://kedokteran.untan.ac.id" target="_blank" class="app-item">
+          <div class="app-icon" style="background: linear-gradient(135deg, #fbbc04, #f9ab00)">W</div>
+          <span class="app-label">Website Fakultas</span>
+        </a>
       @endforelse
     </div>
   </div>
@@ -194,12 +237,26 @@
         </div>
       </button>
       <div id="menuDropdown2" class="dropdown" style="right:0">
-        @forelse($quickLinks ?? [] as $link)
-          <a href="{{ $link->url }}" target="_blank">{{ $link->title }}</a>
+        @forelse($quickLinks ?? [] as $idx => $link)
+          <a href="{{ $link->url }}" target="_blank" class="app-item">
+            <div class="app-icon" style="background: {{ $gradients[$idx % count($gradients)] }}">
+              {{ strtoupper(substr($link->title, 0, 1)) }}
+            </div>
+            <span class="app-label">{{ $link->title }}</span>
+          </a>
         @empty
-          <a href="https://silatfk.untan.ac.id" target="_blank">Silat</a>
-          <a href="http://203.24.51.238:8015" target="_blank">Reservasi Ruang Sidang</a>
-          <a href="https://kedokteran.untan.ac.id" target="_blank">Website Fakultas</a>
+          <a href="https://silatfk.untan.ac.id" target="_blank" class="app-item">
+            <div class="app-icon" style="background: linear-gradient(135deg, #4285f4, #1a73e8)">S</div>
+            <span class="app-label">Silat</span>
+          </a>
+          <a href="http://203.24.51.238:8015" target="_blank" class="app-item">
+            <div class="app-icon" style="background: linear-gradient(135deg, #34a853, #188038)">R</div>
+            <span class="app-label">Reservasi Ruang Sidang</span>
+          </a>
+          <a href="https://kedokteran.untan.ac.id" target="_blank" class="app-item">
+            <div class="app-icon" style="background: linear-gradient(135deg, #fbbc04, #f9ab00)">W</div>
+            <span class="app-label">Website Fakultas</span>
+          </a>
         @endforelse
       </div>
     </div>
