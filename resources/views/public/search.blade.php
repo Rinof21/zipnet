@@ -26,14 +26,28 @@
     .dropdown a:hover { background: #f1f3f4; }
     .login-btn { font-size: 13px; font-weight: 500; color: #fff; background: #1a73e8; padding: 8px 20px; border-radius: 20px; text-decoration: none; transition: background .15s, box-shadow .15s; }
     .login-btn:hover { background: #1557b0; box-shadow: 0 2px 8px rgba(26,115,232,.4); }
+    .user-avatar-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #1a73e8;
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      text-decoration: none;
+      transition: background .15s, box-shadow .15s;
+      flex-shrink: 0;
+    }
+    .user-avatar-btn:hover {
+      background: #1557b0;
+      box-shadow: 0 2px 8px rgba(26,115,232,.4);
+    }
 
     /* HOME */
     .home-wrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 60px 20px 20px; }
     .logo-home { font-size: 64px; font-weight: 300; color: #5f6368; letter-spacing: -1px; margin-bottom: 32px; text-decoration: none; }
     .logo-home span { color: #1a73e8; font-weight: 700; }
-    .home-buttons { display: flex; gap: 12px; margin-top: 28px; }
-    .home-btn { background: #f8f9fa; border: 1px solid #f8f9fa; border-radius: 4px; color: #3c4043; font-size: 14px; font-family: "Inter", sans-serif; padding: 9px 16px; cursor: pointer; transition: background .15s, border-color .15s, box-shadow .15s; }
-    .home-btn:hover { background: #e8e8e9; border-color: #dadce0; box-shadow: 0 1px 1px rgba(0,0,0,.1); }
+    .home-btn { background: #f8f9fa; border: 1px solid #dadce0; border-radius: 6px; color: #3c4043; font-size: 14px; font-weight: 500; font-family: "Inter", sans-serif; padding: 9px 20px; cursor: pointer; transition: background .15s, border-color .15s, box-shadow .15s, color .15s; }
+    .home-btn:hover { background: #fff; border-color: #1a73e8; color: #1a73e8; box-shadow: 0 1px 4px rgba(26,115,232,.15); }
 
     /* SEARCH BAR */
     .search-form { width: 100%; }
@@ -139,7 +153,13 @@
       @endforelse
     </div>
   </div>
-  <a href="/login" class="login-btn">Login</a>
+  @auth
+    <a href="{{ route('documents.search') }}" class="user-avatar-btn" title="Dashboard Staff ({{ auth()->user()->name }})">
+      {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+    </a>
+  @else
+    <a href="/login" class="login-btn">Login</a>
+  @endauth
 </div>
 
 <div class="home-wrapper">
@@ -183,7 +203,13 @@
         @endforelse
       </div>
     </div>
-    <a href="/login" class="login-btn">Login</a>
+    @auth
+      <a href="{{ route('documents.search') }}" class="user-avatar-btn" title="Dashboard Staff ({{ auth()->user()->name }})">
+        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+      </a>
+    @else
+      <a href="/login" class="login-btn">Login</a>
+    @endauth
   </div>
 </div>
 
