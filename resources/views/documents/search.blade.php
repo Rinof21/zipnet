@@ -188,27 +188,29 @@
 
   /* Title cell */
   .doc-title {
-    font-weight: 600;
+    font-weight: 400;
     color: #202124;
     line-height: 1.4;
-    max-width: 200px;
+    max-width: 100%;
+    word-break: break-word;
   }
 
   /* Nomor surat */
   .doc-nomor {
     font-size: 12.5px;
     color: #3c4043;
-    font-family: "Inter", monospace;
-    max-width: 160px;
-    word-break: break-all;
+    font-family: "Inter", sans-serif;
+    max-width: 100%;
+    word-break: break-word;
   }
 
   /* Perihal */
   .doc-perihal {
     font-size: 13px;
     color: #4d5156;
-    max-width: 220px;
+    max-width: 100%;
     line-height: 1.5;
+    word-break: break-word;
   }
 
   /* Kategori badge */
@@ -428,12 +430,11 @@
         <thead>
           <tr>
             <th class="center" style="width:46px">No</th>
-            <th style="min-width:160px">Judul</th>
-            <th style="min-width:200px">Nomor Surat & Perihal</th>
+            <th style="min-width:180px">Judul</th>
+            <th style="min-width:400px">Nomor, Tanggal & Perihal</th>
             <th style="min-width:110px">Kategori</th>
             <th style="min-width:150px">Akses & Pengupload</th>
             <th style="min-width:130px">Tags</th>
-            <th class="center" style="min-width:100px">Tanggal Surat</th>
             <th class="center" style="min-width:80px">Aksi</th>
           </tr>
         </thead>
@@ -447,9 +448,15 @@
               </td>
 
               <td>
-                <div class="doc-nomor" style="font-weight:600;color:#202124">{{ $doc->nomor_surat ?: '-' }}</div>
+                <div class="doc-nomor" style="font-weight:400;color:#202124">{{ $doc->nomor_surat ?: '-' }}</div>
+                @if($doc->tanggal_surat)
+                  <div class="doc-date" style="font-size:12px;color:#188038;margin-top:2px;font-weight:400;display:flex;align-items:center;gap:4px">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    {{ $doc->tanggal_surat->format('d M Y') }}
+                  </div>
+                @endif
                 @if($doc->perihal)
-                  <div class="doc-perihal" style="font-size:12.5px;color:#5f6368;margin-top:3px;line-height:1.4">{{ Str::limit($doc->perihal, 90) }}</div>
+                  <div class="doc-perihal" style="font-size:12.5px;color:#5f6368;margin-top:3px;line-height:1.4">{{ Str::limit($doc->perihal, 140) }}</div>
                 @endif
               </td>
 
@@ -503,10 +510,6 @@
               </td>
 
               <td class="center">
-                <div class="doc-date">{{ $doc->tanggal_surat ? $doc->tanggal_surat->format('d M Y') : '' }}</div>
-              </td>
-
-              <td class="center">
                 @if($canAccess)
                   <div class="action-wrap">
                     <button
@@ -535,7 +538,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="8">
+              <td colspan="7">
                 <div class="empty-state">
                   <div class="empty-icon">🔍</div>
                   <div class="empty-title">Tidak ada dokumen ditemukan</div>
