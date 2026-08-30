@@ -151,7 +151,16 @@
   </style>
 </head>
 
-<body>
+@php
+  $gradients = [
+    'linear-gradient(135deg, #4285f4, #1a73e8)',
+    'linear-gradient(135deg, #34a853, #188038)',
+    'linear-gradient(135deg, #fbbc04, #f9ab00)',
+    'linear-gradient(135deg, #ea4335, #d93025)',
+    'linear-gradient(135deg, #af52de, #8e24aa)',
+    'linear-gradient(135deg, #00897b, #00695c)',
+  ];
+@endphp
 
 @if(empty($q))
 
@@ -162,16 +171,6 @@
         @for($i=0;$i<9;$i++)<span></span>@endfor
       </div>
     </button>
-    @php
-      $gradients = [
-        'linear-gradient(135deg, #4285f4, #1a73e8)',
-        'linear-gradient(135deg, #34a853, #188038)',
-        'linear-gradient(135deg, #fbbc04, #f9ab00)',
-        'linear-gradient(135deg, #ea4335, #d93025)',
-        'linear-gradient(135deg, #af52de, #8e24aa)',
-        'linear-gradient(135deg, #00897b, #00695c)',
-      ];
-    @endphp
     <div id="menuDropdown" class="dropdown">
       @forelse($quickLinks ?? [] as $idx => $link)
         <a href="{{ $link->url }}" target="_blank" class="app-item">
