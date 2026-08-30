@@ -318,16 +318,34 @@
   .spinner-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,.15); border-top-color: #4ca3ff; border-radius: 50%; animation: spin .9s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Mobile Document Cards */
+  .mobile-doc-list { display: none; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .mobile-doc-card { background: #fff; border: 1px solid #e8eaed; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .mobile-doc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .mobile-doc-title { font-size: 15px; font-weight: 600; color: #202124; line-height: 1.4; }
+  .mobile-doc-details { font-size: 12.5px; color: #5f6368; display: flex; flex-direction: column; gap: 4px; background: #f8f9fa; padding: 10px; border-radius: 8px; }
+  .mobile-doc-details div { display: flex; justify-content: space-between; gap: 8px; }
+  .mobile-doc-details strong { color: #202124; font-weight: 500; }
+  .mobile-doc-perihal { font-size: 13px; color: #4d5156; line-height: 1.5; }
+  .mobile-doc-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0; flex-wrap: wrap; }
+  .mobile-doc-actions { display: flex; align-items: center; gap: 6px; }
+
   /* Responsive */
   @media (max-width: 768px) {
-    .page-toolbar { flex-direction: column; align-items: flex-start; gap: 12px; }
-    .btn-upload { width: 100%; justify-content: center; }
-    .search-bar-wrap { padding: 12px; gap: 10px; flex-direction: column; align-items: stretch; }
-    .search-input-group, .search-select-group { width: 100%; min-width: auto; }
-    .btn-search, .btn-reset { width: 100%; justify-content: center; }
+    .page-toolbar { flex-direction: column; align-items: stretch; gap: 12px; }
+    .page-heading { font-size: 18px; }
+    .page-heading-sub { font-size: 12px; }
+    .btn-upload { width: 100% !important; justify-content: center; box-sizing: border-box; }
+    .search-bar-wrap { padding: 12px; gap: 10px; flex-direction: column; align-items: stretch; width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
+    .search-input-group, .search-select-group { width: 100% !important; max-width: 100% !important; min-width: 0 !important; box-sizing: border-box; }
+    .search-input-group input, .search-select-group select { width: 100% !important; max-width: 100% !important; box-sizing: border-box; }
+    .btn-search, .btn-reset { width: 100% !important; justify-content: center; box-sizing: border-box; }
     .drawer { width: 100vw; height: 100dvh; }
     .drawer-header { padding: 10px 12px; gap: 8px; }
     .drawer-btn { padding: 6px 10px; font-size: 11px; }
+
+    .desktop-table-card { display: none; }
+    .mobile-doc-list { display: flex; }
   }
 </style>
 @endpush
@@ -403,8 +421,8 @@
     @if($q) <span>untuk "<strong>{{ $q }}</strong>"</span> @endif
   </div>
 
-  {{-- Table --}}
-  <div class="table-card">
+  {{-- Desktop Table Card --}}
+  <div class="table-card desktop-table-card">
     <div style="overflow-x:auto">
       <table class="doc-table">
         <thead>
@@ -536,6 +554,75 @@
     {{-- Pagination --}}
     @if($documents->hasPages())
       <div class="pagination-wrap">
+        {{ $documents->onEachSide(1)->withQueryString()->links('pagination::bootstrap-5') }}
+      </div>
+    @endif
+  </div>
+
+  {{-- Mobile Document Cards --}}
+  <div class="mobile-doc-list">
+    @forelse($documents as $index => $doc)
+      @php
+        $isOwnDoc = $doc->uploaded_by === auth()->id();
+        $canAccess = !$doc->is_private_to_uploader || $isOwnDoc || auth()->user()->hasRole('Super Admin');
+      @endphp
+      <div class="mobile-doc-card">
+        <div class="mobile-doc-top">
+          <div class="mobile-doc-title">{{ $doc->title }}</div>
+          <div>
+            @if($doc->is_private_to_uploader)
+              <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">🔐 Private</span>
+            @elseif($doc->is_public)
+              <span style="background:#e8f0fe;color:#1a73e8;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">🌐 Publik</span>
+            @else
+              <span style="background:#fef3e2;color:#e37400;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">👥 Internal</span>
+            @endif
+          </div>
+        </div>
+
+        <div class="mobile-doc-details">
+          <div><span>Nomor Surat:</span> <strong>{{ $doc->nomor_surat ?: '-' }}</strong></div>
+          <div><span>Kategori:</span> <strong>{{ $doc->category->name ?? '-' }}</strong></div>
+          <div><span>Pengupload:</span> <strong>{{ $doc->uploader->name ?? '-' }}</strong></div>
+          @if($doc->tanggal_surat)
+            <div><span>Tanggal Surat:</span> <strong>{{ $doc->tanggal_surat->format('d M Y') }}</strong></div>
+          @endif
+        </div>
+
+        @if($doc->perihal)
+          <div class="mobile-doc-perihal">{{ Str::limit($doc->perihal, 100) }}</div>
+        @endif
+
+        <div class="mobile-doc-footer">
+          <div class="mobile-doc-actions">
+            @if($canAccess)
+              <button class="btn-action btn-view" title="Preview" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(asset('storage/' . $doc->file_path)) }}, {{ $doc->id }})" style="width:auto;padding:0 12px;gap:5px">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                <span style="font-size:12px;font-weight:600">Pratinjau</span>
+              </button>
+
+              @if(($isOwnDoc || auth()->user()->hasRole('Super Admin')) && auth()->user()->can('edit dokumen'))
+                <a href="{{ route('documents.edit', $doc->id) }}" class="btn-action btn-edit" title="Edit Dokumen" style="width:auto;padding:0 12px;gap:5px">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  <span style="font-size:12px;font-weight:600">Edit</span>
+                </a>
+              @endif
+            @else
+              <span style="color:#9aa0a6;font-size:12.5px;display:flex;align-items:center;gap:4px">🔒 Akses Terbatas</span>
+            @endif
+          </div>
+        </div>
+      </div>
+    @empty
+      <div class="table-card" style="padding:40px 20px;text-align:center">
+        <div class="empty-icon" style="font-size:36px;margin-bottom:8px">🔍</div>
+        <div class="empty-title" style="font-size:15px;font-weight:600;color:#202124">Tidak ada dokumen ditemukan</div>
+        <div class="empty-sub" style="font-size:13px;color:#70757a">Coba ubah kata kunci atau filter kategori</div>
+      </div>
+    @endforelse
+
+    @if($documents->hasPages())
+      <div class="pagination-wrap" style="background:#fff;border-radius:12px;border:1px solid #e8eaed;margin-top:4px">
         {{ $documents->onEachSide(1)->withQueryString()->links('pagination::bootstrap-5') }}
       </div>
     @endif

@@ -36,6 +36,8 @@
       color: var(--text);
       display: flex;
       min-height: 100vh;
+      max-width: 100vw;
+      overflow-x: hidden;
     }
 
     /* ===== SIDEBAR ===== */
@@ -185,6 +187,8 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      min-width: 0;
+      max-width: 100%;
     }
 
     /* Topbar */
@@ -199,6 +203,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      max-width: 100%;
     }
 
     .topbar-title {
@@ -249,6 +254,9 @@
     .page-content {
       padding: 28px;
       flex: 1;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
     }
 
     /* ===== Bootstrap modal fix (standalone) ===== */
