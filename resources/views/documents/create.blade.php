@@ -367,15 +367,15 @@
 @section('content')
 
   {{-- Back button + page heading --}}
-  <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
-    <a href="{{ route('documents.search') }}" style="display:flex;align-items:center;gap:6px;font-size:13px;color:#70757a;text-decoration:none;padding:6px 12px;border:1px solid #e8eaed;border-radius:8px;transition:background .15s" onmouseover="this.style.background='#f1f3f4'" onmouseout="this.style.background='transparent'">
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-      Kembali
-    </a>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px">
     <div>
       <div style="font-size:20px;font-weight:700;color:#202124">Upload Dokumen</div>
       <div style="font-size:13px;color:#70757a">Tambah arsip dokumen baru ke sistem</div>
     </div>
+    <a href="{{ route('documents.search') }}" style="display:flex;align-items:center;gap:6px;font-size:13px;color:#70757a;text-decoration:none;padding:6px 12px;border:1px solid #e8eaed;border-radius:8px;background:#fff;transition:background .15s" onmouseover="this.style.background='#f1f3f4'" onmouseout="this.style.background='#fff'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Kembali
+    </a>
   </div>
 
   {{-- Validation errors --}}
@@ -563,19 +563,30 @@
           <div class="field-group">
             <label class="field-label">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              File PDF <span class="required">*</span>
+              File PDF Utama <span class="required">*</span>
             </label>
             <div class="file-zone" id="fileZone">
               <input type="file" name="file" id="fileInput" accept="application/pdf" required>
               <div class="file-icon">📄</div>
-              <div class="file-zone-label">Klik atau seret file PDF ke sini</div>
-              <div class="file-zone-sub">Maksimal 10MB · Format PDF</div>
+              <div class="file-zone-label">Pilih atau seret file PDF utama di sini</div>
+              <div class="file-zone-sub">Format: PDF | Maksimal: 10 MB</div>
               <div class="file-name-display" id="fileNameDisplay">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 <span id="fileNameText"></span>
               </div>
             </div>
             @error('file') <div class="field-error-msg">⚠ {{ $message }}</div> @enderror
+          </div>
+
+          {{-- Lampiran Tambahan --}}
+          <div class="field-group" style="margin-top:20px">
+            <label class="field-label" for="attachmentInput">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57a4 4 0 1 1 5.66 5.66l-8.59 8.58a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              Lampiran Tambahan (Opsional — Bisa pilih beberapa file sekaligus)
+            </label>
+            <input type="file" name="attachments[]" id="attachmentInput" multiple class="field-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" onchange="displayAttachmentNames(this)">
+            <div class="field-hint">Format didukung: PDF, Word, Excel, Gambar (Maks 10MB per file)</div>
+            <div id="attachmentList" style="display:flex;flex-direction:column;gap:6px;margin-top:10px"></div>
           </div>
 
           {{-- Actions --}}
@@ -615,6 +626,20 @@
       formTambah.classList.remove('show');
       btnTambah.style.display = 'flex';
     });
+  }
+
+  function displayAttachmentNames(input) {
+    const container = document.getElementById('attachmentList');
+    if (!container) return;
+    container.innerHTML = '';
+    if (input.files && input.files.length > 0) {
+      Array.from(input.files).forEach((file, idx) => {
+        const chip = document.createElement('div');
+        chip.style.cssText = 'font-size:12.5px;color:#174ea6;background:#e8f0fe;padding:6px 12px;border-radius:8px;display:flex;align-items:center;gap:6px;width:fit-content';
+        chip.innerHTML = '📎 <strong>Lampiran ' + (idx + 1) + ':</strong> ' + file.name + ' <span style="color:#70757a">(' + (file.size / 1024 / 1024).toFixed(2) + ' MB)</span>';
+        container.appendChild(chip);
+      });
+    }
   }
 
   // File input display

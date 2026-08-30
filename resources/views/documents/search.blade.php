@@ -406,9 +406,9 @@
       Cari
     </button>
 
-    @if($q || $category || ($uploader && $uploader !== 'all'))
+    @if($q || $category || ($uploader && (string)$uploader !== (string)auth()->id()))
       <a href="{{ route('documents.search') }}" class="btn-reset">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3 21 21"/><path d="M10.5 10.677a2 2 0 0 0 2.823 2.823"/><path d="M7.362 7.561C5.68 8.74 4.279 10.42 3.29 12c1.9 3.05 5.19 6 8.71 6 1.5 0 2.9-.55 4.1-1.38"/><path d="m12 6c4.522 0 7.67 3.65 9.2 6-.64 1.06-1.4 2-2.2 2.77"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3 21 21"/><path d="M10.5 10.677a2 2 0 0 1 2.823 2.823"/><path d="M7.362 7.561C5.68 8.74 4.279 10.42 3.29 12c1.9 3.05 5.19 6 8.71 6 1.5 0 2.9-.55 4.1-1.38"/><path d="m12 6c4.522 0 7.67 3.65 9.2 6-.64 1.06-1.4 2-2.2 2.77"/></svg>
         Reset
       </a>
     @endif
@@ -429,11 +429,9 @@
           <tr>
             <th class="center" style="width:46px">No</th>
             <th style="min-width:160px">Judul</th>
-            <th style="min-width:140px">Nomor Surat</th>
-            <th style="min-width:160px">Perihal</th>
+            <th style="min-width:200px">Nomor Surat & Perihal</th>
             <th style="min-width:110px">Kategori</th>
-            <th style="min-width:85px">Akses</th>
-            <th style="min-width:130px">Pengupload</th>
+            <th style="min-width:150px">Akses & Pengupload</th>
             <th style="min-width:130px">Tags</th>
             <th class="center" style="min-width:100px">Tanggal Surat</th>
             <th class="center" style="min-width:80px">Aksi</th>
@@ -449,11 +447,10 @@
               </td>
 
               <td>
-                <div class="doc-nomor">{{ $doc->nomor_surat ?: '-' }}</div>
-              </td>
-
-              <td>
-                <div class="doc-perihal">{{ Str::limit($doc->perihal, 80) ?: '-' }}</div>
+                <div class="doc-nomor" style="font-weight:600;color:#202124">{{ $doc->nomor_surat ?: '-' }}</div>
+                @if($doc->perihal)
+                  <div class="doc-perihal" style="font-size:12.5px;color:#5f6368;margin-top:3px;line-height:1.4">{{ Str::limit($doc->perihal, 90) }}</div>
+                @endif
               </td>
 
               <td>
@@ -470,22 +467,21 @@
               @endphp
 
               <td>
-                @if($doc->is_private_to_uploader)
-                  @if($isOwnDoc)
-                    <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap" title="Dokumen rahasia milik Anda">🔐 Privat Saya</span>
+                <div style="margin-bottom:5px">
+                  @if($doc->is_private_to_uploader)
+                    @if($isOwnDoc)
+                      <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap" title="Dokumen rahasia milik Anda">🔐 Privat Saya</span>
+                    @else
+                      <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap" title="Dokumen rahasia pengupload">🔐 Private</span>
+                    @endif
+                  @elseif($doc->is_public)
+                    <span style="background:#e8f0fe;color:#1a73e8;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">🌐 Publik</span>
                   @else
-                    <span style="background:#fce8e6;color:#d93025;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap" title="Dokumen rahasia pengupload">🔐 Private</span>
+                    <span style="background:#fef3e2;color:#e37400;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">👥 Internal</span>
                   @endif
-                @elseif($doc->is_public)
-                  <span style="background:#e8f0fe;color:#1a73e8;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">🌐 Publik</span>
-                @else
-                  <span style="background:#fef3e2;color:#e37400;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap">👥 Internal</span>
-                @endif
-              </td>
-
-              <td>
-                <div style="display:flex;align-items:center;gap:6px;font-size:12.5px">
-                  <span style="width:24px;height:24px;border-radius:50%;background:#e8f0fe;color:#1a73e8;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5f6368">
+                  <span style="width:22px;height:22px;border-radius:50%;background:#e8f0fe;color:#1a73e8;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0">
                     {{ strtoupper(substr($doc->uploader->name ?? 'U', 0, 1)) }}
                   </span>
                   <span style="white-space:nowrap">{{ $doc->uploader->name ?? '-' }}</span>
@@ -520,7 +516,8 @@
                         {{ json_encode($doc->title) }},
                         {{ json_encode($doc->nomor_surat) }},
                         {{ json_encode(asset('storage/' . $doc->file_path)) }},
-                        {{ $doc->id }}
+                        {{ $doc->id }},
+                        {{ json_encode($doc->attachments) }}
                       )"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
@@ -538,7 +535,7 @@
             </tr>
           @empty
             <tr>
-              <td colspan="10">
+              <td colspan="8">
                 <div class="empty-state">
                   <div class="empty-icon">🔍</div>
                   <div class="empty-title">Tidak ada dokumen ditemukan</div>
@@ -596,7 +593,7 @@
         <div class="mobile-doc-footer">
           <div class="mobile-doc-actions">
             @if($canAccess)
-              <button class="btn-action btn-view" title="Preview" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(asset('storage/' . $doc->file_path)) }}, {{ $doc->id }})" style="width:auto;padding:0 12px;gap:5px">
+              <button class="btn-action btn-view" title="Preview" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(asset('storage/' . $doc->file_path)) }}, {{ $doc->id }}, {{ json_encode($doc->attachments) }})" style="width:auto;padding:0 12px;gap:5px">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
                 <span style="font-size:12px;font-weight:600">Pratinjau</span>
               </button>
@@ -650,6 +647,10 @@
         </a>
       </div>
     </div>
+
+    {{-- File Selector Pills --}}
+    <div id="drawerFileSelector" style="background:#f8f9fa;border-bottom:1px solid #e8eaed;padding:8px 16px;display:none;gap:8px;align-items:center;overflow-x:auto;white-space:nowrap"></div>
+
     <div class="drawer-body">
       <div class="drawer-loading" id="drawerLoading">
         <div class="spinner-ring"></div>
@@ -663,26 +664,69 @@
 
 @push('scripts')
 <script>
-  const drawer  = document.getElementById('pdfDrawer');
-  const overlay = document.getElementById('drawerOverlay');
-  const frame   = document.getElementById('pdfFrame');
-  const loading = document.getElementById('drawerLoading');
-  const titleEl = document.getElementById('drawerTitle');
-  const subEl   = document.getElementById('drawerSub');
-  const openLink  = document.getElementById('drawerOpenLink');
-  const editLink  = document.getElementById('drawerEditLink');
+  const drawer   = document.getElementById('pdfDrawer');
+  const overlay  = document.getElementById('drawerOverlay');
+  const frame    = document.getElementById('pdfFrame');
+  const loading  = document.getElementById('drawerLoading');
+  const titleEl  = document.getElementById('drawerTitle');
+  const subEl    = document.getElementById('drawerSub');
+  const openLink = document.getElementById('drawerOpenLink');
+  const editLink = document.getElementById('drawerEditLink');
+  const fileSelector = document.getElementById('drawerFileSelector');
 
-  function openDrawer(title, nomor, pdfUrl, docId) {
+  function openDrawer(title, nomor, primaryPdfUrl, docId, attachments = []) {
     titleEl.textContent = title;
     subEl.textContent   = nomor ? 'Nomor Surat: ' + nomor : '—';
-    openLink.href       = pdfUrl;
-    editLink.href       = '/documents/' + docId + '/edit';
+    openLink.href       = primaryPdfUrl;
+    if (editLink) editLink.href = '/documents/' + docId + '/edit';
+
+    // Build file switcher pills if attachments exist
+    fileSelector.innerHTML = '';
+    if (attachments && attachments.length > 0) {
+      fileSelector.style.display = 'flex';
+
+      // Primary file pill
+      const mainPill = document.createElement('button');
+      mainPill.className = 'pill-file active';
+      mainPill.style.cssText = 'padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;border:1px solid #1a73e8;background:#1a73e8;color:#fff;cursor:pointer;white-space:nowrap';
+      mainPill.textContent = '📄 Surat Utama';
+      mainPill.onclick = () => switchFile(primaryPdfUrl, mainPill);
+      fileSelector.appendChild(mainPill);
+
+      // Attachment pills
+      attachments.forEach((att, i) => {
+        const attUrl = '/storage/' + att.file_path;
+        const attPill = document.createElement('button');
+        attPill.className = 'pill-file';
+        attPill.style.cssText = 'padding:5px 12px;border-radius:16px;font-size:12px;font-weight:500;border:1px solid #dadce0;background:#fff;color:#5f6368;cursor:pointer;white-space:nowrap';
+        attPill.textContent = '📎 Lampiran ' + (i + 1) + ': ' + att.file_name;
+        attPill.onclick = () => switchFile(attUrl, attPill);
+        fileSelector.appendChild(attPill);
+      });
+    } else {
+      fileSelector.style.display = 'none';
+    }
+
     loading.classList.remove('hidden');
     frame.src = '';
     drawer.classList.add('open');
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
-    setTimeout(() => { frame.src = pdfUrl; }, 200);
+    setTimeout(() => { frame.src = primaryPdfUrl; }, 200);
+  }
+
+  function switchFile(url, activePill) {
+    document.querySelectorAll('#drawerFileSelector button').forEach(b => {
+      b.style.background = '#fff';
+      b.style.color = '#5f6368';
+      b.style.borderColor = '#dadce0';
+    });
+    activePill.style.background = '#1a73e8';
+    activePill.style.color = '#fff';
+    activePill.style.borderColor = '#1a73e8';
+    openLink.href = url;
+    loading.classList.remove('hidden');
+    frame.src = url;
   }
 
   function closeDrawer() {

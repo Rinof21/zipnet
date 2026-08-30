@@ -51,6 +51,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents/{id}/edit', [DocumentController::class, 'edit'])->middleware('permission:edit dokumen')->name('documents.edit');
     Route::put('/documents/{id}', [DocumentController::class, 'update'])->middleware('permission:edit dokumen')->name('documents.update');
 
+    // Lampiran dokumen
+    Route::get('/documents/attachments/{attachment}/download', [DocumentController::class, 'downloadAttachment'])->name('documents.attachments.download');
+    Route::delete('/documents/attachments/{attachment}', [DocumentController::class, 'destroyAttachment'])->middleware('permission:edit dokumen')->name('documents.attachments.destroy');
+
     // Pencarian internal
     Route::get('/search', [DocumentController::class, 'search'])->name('documents.search');
 

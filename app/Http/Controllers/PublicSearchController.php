@@ -14,7 +14,8 @@ class PublicSearchController extends Controller
         $documents = [];
 
         if ($q) {
-            $documents = Document::where(function ($query) use ($q) {
+            $documents = Document::with('attachments')
+                ->where(function ($query) use ($q) {
                     $query->where('title', 'like', "%$q%")
                         ->orWhere('perihal', 'like', "%$q%")
                         ->orWhere('nomor_surat', 'like', "%$q%");

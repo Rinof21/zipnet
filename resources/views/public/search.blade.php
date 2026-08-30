@@ -187,12 +187,15 @@
         $isAccessible = $doc->is_public && !$doc->is_private_to_uploader;
       @endphp
       @if($isAccessible)
-        <a href="#" class="result-card" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(asset('storage/' . $doc->file_path)) }}); return false;">
+        <a href="#" class="result-card" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(asset('storage/' . $doc->file_path)) }}, {{ json_encode($doc->attachments) }}); return false;">
           <div class="result-url">cariarsip › arsip › {{ Str::slug($doc->title) }}</div>
           <div class="result-title">{{ $doc->title }}</div>
           <div class="result-snippet">
             Nomor Surat: <strong>{{ $doc->nomor_surat }}</strong>
             @if($doc->perihal) &nbsp;·&nbsp; {{ Str::limit($doc->perihal, 120) }} @endif
+            @if($doc->attachments && $doc->attachments->count() > 0)
+              &nbsp;·&nbsp; <span style="color:#1a73e8;font-weight:600">📎 {{ $doc->attachments->count() }} Lampiran</span>
+            @endif
           </div>
           <div class="result-date">{{ $doc->tanggal_surat ? $doc->tanggal_surat->format('d M Y') : '' }}</div>
         </a>
@@ -230,6 +233,10 @@
       Buka Penuh
     </a>
   </div>
+
+  {{-- File Selector Pills --}}
+  <div id="drawerFileSelector" style="background:#f8f9fa;border-bottom:1px solid #e8eaed;padding:8px 16px;display:none;gap:8px;align-items:center;overflow-x:auto;white-space:nowrap"></div>
+
   <div class="drawer-body">
     <div class="drawer-loading" id="drawerLoading">
       <div class="spinner"></div>
@@ -259,18 +266,63 @@
   const titleEl = document.getElementById('drawerTitle');
   const subEl = document.getElementById('drawerSub');
   const openLink = document.getElementById('drawerOpenLink');
+  const fileSelector = document.getElementById('drawerFileSelector');
 
-  function openDrawer(title, nomor, pdfUrl) {
+  function openDrawer(title, nomor, primaryPdfUrl, attachments = []) {
     if (!drawer) return;
     titleEl.textContent = title;
     subEl.textContent = 'Nomor Surat: ' + nomor;
-    if (openLink) openLink.href = pdfUrl;
+    if (openLink) openLink.href = primaryPdfUrl;
+
+    // Build file switcher pills
+    if (fileSelector) {
+      fileSelector.innerHTML = '';
+      if (attachments && attachments.length > 0) {
+        fileSelector.style.display = 'flex';
+
+        // Main file
+        const mainPill = document.createElement('button');
+        mainPill.style.cssText = 'padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;border:1px solid #1a73e8;background:#1a73e8;color:#fff;cursor:pointer;white-space:nowrap';
+        mainPill.textContent = '📄 Surat Utama';
+        mainPill.onclick = () => switchPublicFile(primaryPdfUrl, mainPill);
+        fileSelector.appendChild(mainPill);
+
+        // Attachment files
+        attachments.forEach((att, i) => {
+          const attUrl = '/storage/' + att.file_path;
+          const attPill = document.createElement('button');
+          attPill.style.cssText = 'padding:5px 12px;border-radius:16px;font-size:12px;font-weight:500;border:1px solid #dadce0;background:#fff;color:#5f6368;cursor:pointer;white-space:nowrap';
+          attPill.textContent = '📎 Lampiran ' + (i + 1) + ': ' + att.file_name;
+          attPill.onclick = () => switchPublicFile(attUrl, attPill);
+          fileSelector.appendChild(attPill);
+        });
+      } else {
+        fileSelector.style.display = 'none';
+      }
+    }
+
     if (loading) loading.style.display = 'flex';
     if (frame) frame.src = '';
     drawer.classList.add('open');
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
-    setTimeout(() => { if (frame) frame.src = pdfUrl; }, 250);
+    setTimeout(() => { if (frame) frame.src = primaryPdfUrl; }, 250);
+  }
+
+  function switchPublicFile(url, activePill) {
+    if (fileSelector) {
+      fileSelector.querySelectorAll('button').forEach(b => {
+        b.style.background = '#fff';
+        b.style.color = '#5f6368';
+        b.style.borderColor = '#dadce0';
+      });
+    }
+    activePill.style.background = '#1a73e8';
+    activePill.style.color = '#fff';
+    activePill.style.borderColor = '#1a73e8';
+    if (openLink) openLink.href = url;
+    if (loading) loading.style.display = 'flex';
+    if (frame) frame.src = url;
   }
 
   function closeDrawer() {

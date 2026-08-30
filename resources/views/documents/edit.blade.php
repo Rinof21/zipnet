@@ -157,15 +157,15 @@
 @section('content')
 
   {{-- Back + heading --}}
-  <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px">
-    <a href="{{ route('documents.search') }}" style="display:flex;align-items:center;gap:6px;font-size:13px;color:#70757a;text-decoration:none;padding:6px 12px;border:1px solid #e8eaed;border-radius:8px;transition:background .15s" onmouseover="this.style.background='#f1f3f4'" onmouseout="this.style.background='transparent'">
-      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-      Kembali
-    </a>
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px">
     <div>
       <div style="font-size:20px;font-weight:700;color:#202124">Edit Dokumen</div>
       <div style="font-size:13px;color:#70757a">Perbarui informasi arsip dokumen</div>
     </div>
+    <a href="{{ route('documents.search') }}" style="display:flex;align-items:center;gap:6px;font-size:13px;color:#70757a;text-decoration:none;padding:6px 12px;border:1px solid #e8eaed;border-radius:8px;background:#fff;transition:background .15s" onmouseover="this.style.background='#f1f3f4'" onmouseout="this.style.background='#fff'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+      Kembali
+    </a>
   </div>
 
   {{-- Validation errors --}}
@@ -247,7 +247,7 @@
       </div>
 
       <div class="form-card-body">
-        <form action="{{ route('documents.update', $document->id) }}" method="POST" id="editForm">
+        <form action="{{ route('documents.update', $document->id) }}" method="POST" enctype="multipart/form-data" id="editForm">
           @csrf
           @method('PUT')
 
@@ -360,6 +360,43 @@
           </div>
 
           <div class="form-section-divider"></div>
+          <div class="form-section-label">Lampiran Dokumen Tambahan</div>
+
+          @if($document->attachments && $document->attachments->count() > 0)
+            <div style="margin-bottom:18px;display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:12.5px;font-weight:600;color:#5f6368">Lampiran Tersimpan:</div>
+              @foreach($document->attachments as $att)
+                <div style="background:#f8f9fa;border:1px solid #e8eaed;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
+                  <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                    <span style="font-size:16px">📎</span>
+                    <div style="min-width:0">
+                      <div style="font-size:13px;font-weight:600;color:#202124;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $att->file_name }}</div>
+                      <div style="font-size:11px;color:#70757a">{{ number_format($att->file_size / 1024, 1) }} KB</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+                    <a href="{{ route('documents.attachments.download', $att->id) }}" class="btn-action btn-view" title="Unduh Lampiran" style="width:auto;padding:5px 10px;font-size:12px;text-decoration:none;gap:4px">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      Unduh
+                    </a>
+                    <button type="button" class="btn-action btn-delete" title="Hapus Lampiran" style="width:auto;padding:5px 10px;font-size:12px;gap:4px" onclick="if(confirm('Hapus lampiran {{ $att->file_name }}?')) document.getElementById('del-att-{{ $att->id }}').submit();">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              @endforeach
+            </div>
+          @endif
+
+          <div class="field-group">
+            <label class="field-label" for="new_attachments">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e37400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57a4 4 0 1 1 5.66 5.66l-8.59 8.58a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              Tambah Lampiran Baru (Opsional)
+            </label>
+            <input type="file" name="new_attachments[]" id="new_attachments" multiple class="field-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx">
+            <div class="field-hint">Anda bisa memilih beberapa file sekaligus (Maks 10MB per file)</div>
+          </div>
 
           <div class="form-actions">
             <button type="submit" class="btn-save" id="btnSave">
@@ -370,6 +407,15 @@
           </div>
 
         </form>
+
+        @if($document->attachments)
+          @foreach($document->attachments as $att)
+            <form id="del-att-{{ $att->id }}" action="{{ route('documents.attachments.destroy', $att->id) }}" method="POST" style="display:none">
+              @csrf
+              @method('DELETE')
+            </form>
+          @endforeach
+        @endif
       </div>
     </div>
 

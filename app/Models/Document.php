@@ -35,4 +35,9 @@ class Document extends Model
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
+
+    public function attachments()
+    {
+        return $this->hasMany(DocumentAttachment::class);
+    }
 }

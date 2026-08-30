@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Document;
+use App\Models\DocumentAttachment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
@@ -14,23 +16,6 @@ class DocumentController extends Controller
     {
         $this->middleware('auth')->except(['preview']);
     }
-
-
-    // public function search(Request $request)
-    // {
-    //     $q = $request->q;
-
-    //     $documents = Document::query()
-    //         ->when($q, function ($query) use ($q) {
-    //             $query->where('title', 'like', "%$q%")
-    //                 ->orWhere('nomor_surat', 'like', "%$q%") // ✅ Updated
-    //                 ->orWhere('perihal', 'like', "%$q%");
-    //         })
-    //         ->orderBy('created_at', 'desc')
-    //         ->paginate(20);
-
-    //     return view('documents.search', compact('documents', 'q'));
-    // }
 
     protected function authorizeDocumentAccess(Document $document)
     {
@@ -57,7 +42,7 @@ class DocumentController extends Controller
         $uploaders = User::orderBy('name')->get();
 
         $documents = Document::query()
-            ->with(['category', 'uploader'])
+            ->with(['category', 'uploader', 'attachments'])
             ->when($q, function ($query) use ($q) {
                 $query->where('title', 'like', "%$q%")
                     ->orWhere('nomor_surat', 'like', "%$q%")
@@ -85,19 +70,21 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'title' => 'required',
             'file' => 'required|mimes:pdf|max:10240',
+            'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx|max:10240',
             'tanggal_surat' => 'nullable|date',
         ]);
 
         $file = $request->file('file');
         $name = time() . '_' . $file->getClientOriginalName();
         $path = $file->storeAs('documents', $name, 'public');
-        $tags = array_map('trim', explode(',', $request->tags));
+        $tags = array_map('trim', array_filter(explode(',', (string)$request->tags)));
 
         $isPrivate = $request->has('is_private_to_uploader') ? true : false;
         $isPublic = $isPrivate ? false : ($request->has('is_public') ? true : false);
 
-        Document::create([
+        $document = Document::create([
             'title' => $request->title,
             'category_id' => $request->category_id,
             'nomor_surat' => $request->nomor_surat,
@@ -111,12 +98,30 @@ class DocumentController extends Controller
             'is_private_to_uploader' => $isPrivate,
         ]);
 
+        // Process attachments
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $attFile) {
+                if ($attFile && $attFile->isValid()) {
+                    $attName = time() . '_' . rand(100, 999) . '_' . $attFile->getClientOriginalName();
+                    $attPath = $attFile->storeAs('documents/attachments', $attName, 'public');
+
+                    $document->attachments()->create([
+                        'file_name' => $attFile->getClientOriginalName(),
+                        'file_path' => $attPath,
+                        'file_size' => $attFile->getSize(),
+                        'file_type' => strtolower($attFile->getClientOriginalExtension()),
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('documents.search')->with('success', 'Dokumen berhasil disimpan');
     }
 
     public function show(Document $document)
     {
         $this->authorizeDocumentAccess($document);
+        $document->load('attachments');
         return view('documents.show', compact('document'));
     }
 
@@ -143,7 +148,7 @@ class DocumentController extends Controller
 
     public function edit($id)
     {
-        $document = Document::findOrFail($id);
+        $document = Document::with('attachments')->findOrFail($id);
         $this->authorizeDocumentAccess($document);
         $this->authorizeDocumentEdit($document);
 
@@ -165,6 +170,7 @@ class DocumentController extends Controller
             'category_id' => 'nullable|integer',
             'tanggal_surat' => 'nullable|date',
             'tags' => 'nullable|string',
+            'new_attachments.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx|max:10240',
         ]);
 
         $isPrivate = $request->has('is_private_to_uploader') ? true : false;
@@ -176,11 +182,55 @@ class DocumentController extends Controller
             'perihal' => $request->perihal,
             'category_id' => $request->category_id,
             'tanggal_surat' => $request->tanggal_surat,
-            'tags' => $request->tags ? explode(',', $request->tags) : [],
+            'tags' => $request->tags ? array_map('trim', explode(',', $request->tags)) : [],
             'is_public' => $isPublic,
             'is_private_to_uploader' => $isPrivate,
         ]);
 
+        // Process new attachments if uploaded
+        if ($request->hasFile('new_attachments')) {
+            foreach ($request->file('new_attachments') as $attFile) {
+                if ($attFile && $attFile->isValid()) {
+                    $attName = time() . '_' . rand(100, 999) . '_' . $attFile->getClientOriginalName();
+                    $attPath = $attFile->storeAs('documents/attachments', $attName, 'public');
+
+                    $document->attachments()->create([
+                        'file_name' => $attFile->getClientOriginalName(),
+                        'file_path' => $attPath,
+                        'file_size' => $attFile->getSize(),
+                        'file_type' => strtolower($attFile->getClientOriginalExtension()),
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('documents.search')->with('success', 'Dokumen berhasil diperbarui.');
+    }
+
+    public function downloadAttachment(DocumentAttachment $attachment)
+    {
+        $document = $attachment->document;
+        $this->authorizeDocumentAccess($document);
+
+        if (!Storage::disk('public')->exists($attachment->file_path)) {
+            abort(404, 'File lampiran tidak ditemukan.');
+        }
+
+        return Storage::disk('public')->download($attachment->file_path, $attachment->file_name);
+    }
+
+    public function destroyAttachment(DocumentAttachment $attachment)
+    {
+        $document = $attachment->document;
+        $this->authorizeDocumentAccess($document);
+        $this->authorizeDocumentEdit($document);
+
+        if (Storage::disk('public')->exists($attachment->file_path)) {
+            Storage::disk('public')->delete($attachment->file_path);
+        }
+
+        $attachment->delete();
+
+        return back()->with('success', 'Lampiran berhasil dihapus.');
     }
 }
