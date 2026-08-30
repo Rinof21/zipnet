@@ -153,7 +153,14 @@
     background: #fff;
     border: 1px solid #e8eaed;
     border-radius: 14px;
-    overflow: hidden;
+    min-height: 320px;
+  }
+
+  .table-scroll-wrap {
+    overflow-x: auto;
+    padding-bottom: 80px;
+    margin-bottom: -80px;
+    border-radius: 14px;
   }
 
   .doc-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
@@ -260,6 +267,44 @@
   .btn-view:hover { background: #d2e3fc; }
   .btn-edit { background: #fef3e2; color: #e37400; }
   .btn-edit:hover { background: #fde7b0; }
+  .btn-menu { background: transparent; color: #5f6368; border-radius: 50%; border: none; }
+  .btn-menu:hover { background: #f1f3f4; color: #202124; transform: none; }
+
+  /* Action Dropdown Menu (Titik Tiga) */
+  .action-dropdown-wrap { position: relative; display: inline-block; }
+  .action-dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background: #fff;
+    border: 1px solid #e8eaed;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.15);
+    min-width: 160px;
+    z-index: 200;
+    display: none;
+    padding: 6px 0;
+  }
+  .action-dropdown-menu.show { display: block; }
+  .action-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #3c4043;
+    text-decoration: none;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .action-dropdown-item:hover { background: #f8f9fa; color: #1a73e8; }
+  .action-dropdown-item.danger { color: #d93025; }
+  .action-dropdown-item.danger:hover { background: #fce8e6; color: #c5221f; }
 
   /* Empty state */
   .empty-state {
@@ -425,7 +470,7 @@
 
   {{-- Desktop Table Card --}}
   <div class="table-card desktop-table-card">
-    <div style="overflow-x:auto">
+    <div class="table-scroll-wrap">
       <table class="doc-table">
         <thead>
           <tr>
@@ -526,9 +571,25 @@
                       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
                     @if(($isOwnDoc || auth()->user()->hasRole('Super Admin')) && auth()->user()->can('edit dokumen'))
-                    <a href="{{ route('documents.edit', $doc->id) }}" class="btn-action btn-edit" title="Edit Dokumen">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </a>
+                    <div class="action-dropdown-wrap">
+                      <button type="button" class="btn-action btn-menu" title="Menu Opsi" onclick="toggleActionMenu(event, 'dt-{{ $doc->id }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                      </button>
+                      <div id="actionMenu-dt-{{ $doc->id }}" class="action-dropdown-menu">
+                        <a href="{{ route('documents.edit', $doc->id) }}" class="action-dropdown-item">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                          Edit Dokumen
+                        </a>
+                        <form action="{{ route('documents.destroy', $doc->id) }}" method="POST" style="margin:0" onsubmit="return confirm('Pindahkan dokumen {{ json_encode($doc->title) }} ke Tempat Sampah?')">
+                          @csrf
+                          @method('DELETE')
+                          <button type="submit" class="action-dropdown-item danger">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            Hapus Dokumen
+                          </button>
+                        </form>
+                      </div>
+                    </div>
                     @endif
                   </div>
                 @else
@@ -602,10 +663,25 @@
               </button>
 
               @if(($isOwnDoc || auth()->user()->hasRole('Super Admin')) && auth()->user()->can('edit dokumen'))
-                <a href="{{ route('documents.edit', $doc->id) }}" class="btn-action btn-edit" title="Edit Dokumen" style="width:auto;padding:0 12px;gap:5px">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  <span style="font-size:12px;font-weight:600">Edit</span>
-                </a>
+                <div class="action-dropdown-wrap">
+                  <button type="button" class="btn-action btn-menu" title="Menu Opsi" onclick="toggleActionMenu(event, 'mb-{{ $doc->id }}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                  </button>
+                  <div id="actionMenu-mb-{{ $doc->id }}" class="action-dropdown-menu">
+                    <a href="{{ route('documents.edit', $doc->id) }}" class="action-dropdown-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      Edit Dokumen
+                    </a>
+                    <form action="{{ route('documents.destroy', $doc->id) }}" method="POST" style="margin:0" onsubmit="return confirm('Pindahkan dokumen {{ json_encode($doc->title) }} ke Tempat Sampah?')">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="action-dropdown-item danger">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        Hapus Dokumen
+                      </button>
+                    </form>
+                  </div>
+                </div>
               @endif
             @else
               <span style="color:#9aa0a6;font-size:12.5px;display:flex;align-items:center;gap:4px">🔒 Akses Terbatas</span>
@@ -738,6 +814,18 @@
     document.body.style.overflow = '';
     setTimeout(() => { frame.src = ''; }, 350);
   }
+
+  function toggleActionMenu(event, key) {
+    event.stopPropagation();
+    const menu = document.getElementById('actionMenu-' + key);
+    const all = document.querySelectorAll('.action-dropdown-menu');
+    all.forEach(m => { if (m !== menu) m.classList.remove('show'); });
+    if (menu) menu.classList.toggle('show');
+  }
+
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.action-dropdown-menu').forEach(m => m.classList.remove('show'));
+  });
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 </script>

@@ -146,6 +146,14 @@ class DocumentController extends Controller
         }
     }
 
+    protected function authorizeDocumentDelete(Document $document)
+    {
+        $user = Auth::user();
+        if ($user && $document->uploaded_by !== $user->id && !$user->hasRole('Super Admin')) {
+            abort(403, 'Anda tidak memiliki hak untuk menghapus dokumen milik pengupload lain.');
+        }
+    }
+
     public function edit($id)
     {
         $document = Document::with('attachments')->findOrFail($id);
@@ -232,5 +240,71 @@ class DocumentController extends Controller
         $attachment->delete();
 
         return back()->with('success', 'Lampiran berhasil dihapus.');
+    }
+
+    public function destroy(Document $document)
+    {
+        $this->authorizeDocumentAccess($document);
+        $this->authorizeDocumentDelete($document);
+
+        $document->delete();
+
+        return redirect()->route('documents.search')->with('success', 'Dokumen berhasil dipindahkan ke Tempat Sampah.');
+    }
+
+    public function trash(Request $request)
+    {
+        $q = trim($request->q);
+        $user = Auth::user();
+
+        $documents = Document::onlyTrashed()
+            ->with(['category', 'uploader', 'attachments'])
+            ->when($user && !$user->hasRole('Super Admin'), function ($query) use ($user) {
+                $query->where('uploaded_by', $user->id);
+            })
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('title', 'like', "%$q%")
+                        ->orWhere('nomor_surat', 'like', "%$q%")
+                        ->orWhere('perihal', 'like', "%$q%");
+                });
+            })
+            ->orderBy('deleted_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('documents.trash', compact('documents', 'q'));
+    }
+
+    public function restore($id)
+    {
+        $document = Document::onlyTrashed()->findOrFail($id);
+        $this->authorizeDocumentDelete($document);
+
+        $document->restore();
+
+        return redirect()->route('documents.trash')->with('success', 'Dokumen berhasil dipulihkan dari Tempat Sampah.');
+    }
+
+    public function forceDelete($id)
+    {
+        $document = Document::onlyTrashed()->with('attachments')->findOrFail($id);
+        $this->authorizeDocumentDelete($document);
+
+        // Delete primary file
+        if (Storage::disk('public')->exists($document->file_path)) {
+            Storage::disk('public')->delete($document->file_path);
+        }
+
+        // Delete attachment files
+        foreach ($document->attachments as $att) {
+            if (Storage::disk('public')->exists($att->file_path)) {
+                Storage::disk('public')->delete($att->file_path);
+            }
+        }
+
+        $document->forceDelete();
+
+        return redirect()->route('documents.trash')->with('success', 'Dokumen berhasil dihapus secara permanen.');
     }
 }

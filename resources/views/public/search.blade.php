@@ -16,10 +16,10 @@
     /* TOP BAR */
     .topbar { position: fixed; top: 0; right: 0; left: 0; height: 60px; display: flex; align-items: center; justify-content: flex-end; padding: 0 20px; gap: 12px; z-index: 100; background: transparent; }
     .topbar.has-query { background: #fff; border-bottom: 1px solid #e8eaed; }
-    .menu-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+    .menu-btn { width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
     .menu-btn:hover { background: #f1f3f4; }
-    .dot-grid { display: grid; grid-template-columns: repeat(3, 8px); gap: 3px; }
-    .dot-grid span { width: 8px; height: 8px; border-radius: 50%; background: #5f6368; }
+    .dot-grid { display: grid; grid-template-columns: repeat(3, 4px); gap: 2.5px; }
+    .dot-grid span { width: 4px; height: 4px; border-radius: 50%; background: #5f6368; }
     .dropdown { position: absolute; top: 52px; right: 0; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.18); min-width: 210px; overflow: hidden; display: none; z-index: 200; }
     .dropdown.open { display: block; }
     .dropdown a { display: flex; align-items: center; gap: 10px; padding: 12px 16px; font-size: 14px; color: #202124; text-decoration: none; transition: background .12s; }
@@ -130,9 +130,13 @@
       </div>
     </button>
     <div id="menuDropdown" class="dropdown">
-      <a href="https://silatfk.untan.ac.id" target="_blank">Silat</a>
-      <a href="http://203.24.51.238:8015" target="_blank">Reservasi Ruang Sidang</a>
-      <a href="https://kedokteran.untan.ac.id" target="_blank">Website Fakultas</a>
+      @forelse($quickLinks ?? [] as $link)
+        <a href="{{ $link->url }}" target="_blank">{{ $link->title }}</a>
+      @empty
+        <a href="https://silatfk.untan.ac.id" target="_blank">Silat</a>
+        <a href="http://203.24.51.238:8015" target="_blank">Reservasi Ruang Sidang</a>
+        <a href="https://kedokteran.untan.ac.id" target="_blank">Website Fakultas</a>
+      @endforelse
     </div>
   </div>
   <a href="/login" class="login-btn">Login</a>
@@ -170,9 +174,13 @@
         </div>
       </button>
       <div id="menuDropdown2" class="dropdown" style="right:0">
-        <a href="https://silatfk.untan.ac.id" target="_blank">Silat</a>
-        <a href="http://203.24.51.238:8015" target="_blank">Reservasi Ruang Sidang</a>
-        <a href="https://kedokteran.untan.ac.id" target="_blank">Website Fakultas</a>
+        @forelse($quickLinks ?? [] as $link)
+          <a href="{{ $link->url }}" target="_blank">{{ $link->title }}</a>
+        @empty
+          <a href="https://silatfk.untan.ac.id" target="_blank">Silat</a>
+          <a href="http://203.24.51.238:8015" target="_blank">Reservasi Ruang Sidang</a>
+          <a href="https://kedokteran.untan.ac.id" target="_blank">Website Fakultas</a>
+        @endforelse
       </div>
     </div>
     <a href="/login" class="login-btn">Login</a>

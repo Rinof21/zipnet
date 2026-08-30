@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document;
+use App\Models\QuickLink;
 use Illuminate\Http\Request;
 
 class PublicSearchController extends Controller
@@ -24,7 +25,9 @@ class PublicSearchController extends Controller
                 ->get();
         }
 
-        return view('public.search', compact('q', 'documents'));
+        $quickLinks = QuickLink::where('is_active', true)->orderBy('sort_order', 'asc')->get();
+
+        return view('public.search', compact('q', 'documents', 'quickLinks'));
     }
 
     public function preview(Document $document)

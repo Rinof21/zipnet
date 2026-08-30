@@ -7,6 +7,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\PublicSearchController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\QuickLinkController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -55,6 +56,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents/attachments/{attachment}/download', [DocumentController::class, 'downloadAttachment'])->name('documents.attachments.download');
     Route::delete('/documents/attachments/{attachment}', [DocumentController::class, 'destroyAttachment'])->middleware('permission:edit dokumen')->name('documents.attachments.destroy');
 
+    // Trash & Soft Delete Dokumen
+    Route::get('/documents/trash/list', [DocumentController::class, 'trash'])->name('documents.trash');
+    Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->middleware('permission:edit dokumen')->name('documents.destroy');
+    Route::post('/documents/trash/{id}/restore', [DocumentController::class, 'restore'])->middleware('permission:edit dokumen')->name('documents.restore');
+    Route::delete('/documents/trash/{id}/force-delete', [DocumentController::class, 'forceDelete'])->middleware('permission:edit dokumen')->name('documents.forceDelete');
+
     // Pencarian internal
     Route::get('/search', [DocumentController::class, 'search'])->name('documents.search');
 
@@ -70,6 +77,9 @@ Route::middleware('auth')->group(function () {
 
     // Users CRUD (memerlukan izin kelola pengguna)
     Route::resource('users', UserController::class)->middleware('permission:kelola pengguna');
+
+    // Quick Links / Menu Titik 9 (Khusus Super Admin)
+    Route::resource('quick-links', QuickLinkController::class)->middleware('role:Super Admin');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
