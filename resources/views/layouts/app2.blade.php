@@ -271,11 +271,26 @@
     .table-modern tbody tr:hover { background: #fafafa; }
     .table-modern tbody tr:last-child td { border-bottom: none; }
 
+    /* Responsive table wrapper */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: var(--radius);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
-      .sidebar { transform: translateX(-100%); }
+      #sidebarToggle { display: flex !important; }
+      .sidebar { transform: translateX(-100%); z-index: 1060; }
       .sidebar.open { transform: translateX(0); }
       .main-wrap { margin-left: 0; }
+      .topbar { padding: 0 14px; gap: 10px; }
+      .page-content { padding: 16px 12px; }
+      .topbar-user-name { display: none; }
+      .topbar-public-text { display: none; }
+      .topbar-title { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .modal-dialog { margin: 10px; max-width: calc(100% - 20px); }
     }
   </style>
 </head>
@@ -361,12 +376,12 @@
       </button>
       <span class="topbar-title">@yield('title', 'Dashboard')</span>
       <div class="topbar-actions">
-        <a href="{{ route('public.search') }}" class="topbar-btn" title="Halaman Publik" style="width:auto;padding:0 12px;border-radius:16px;border:1px solid #e8eaed;font-size:12px;font-weight:500;color:#5f6368;gap:5px;display:flex;align-items:center">
+        <a href="{{ route('public.search') }}" class="topbar-btn" title="Halaman Publik" style="width:auto;padding:0 10px;border-radius:16px;border:1px solid #e8eaed;font-size:12px;font-weight:500;color:#5f6368;gap:5px;display:flex;align-items:center">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Halaman Publik
+          <span class="topbar-public-text">Halaman Publik</span>
         </a>
-        <div style="width:1px;height:24px;background:#e8eaed"></div>
-        <div style="font-size:13px;font-weight:500;color:#202124">{{ auth()->user()->name ?? 'User' }}</div>
+        <div style="width:1px;height:24px;background:#e8eaed" class="topbar-user-name"></div>
+        <div style="font-size:13px;font-weight:500;color:#202124" class="topbar-user-name">{{ auth()->user()->name ?? 'User' }}</div>
         <div class="topbar-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
       </div>
     </header>

@@ -127,7 +127,16 @@
   .switch-slider::before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: #ffffff; transition: transform .2s ease; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
   .switch-wrap input:checked + .switch-slider { background-color: #1a73e8; }
   .switch-wrap input:checked + .switch-slider::before { transform: translateX(22px); }
-  .switch-wrap.orange input:checked + .switch-slider { background-color: #e37400; }
+  /* Responsive */
+  @media (max-width: 900px) {
+    .edit-layout { grid-template-columns: 1fr; }
+    .info-card { position: static; }
+    .form-row-2 { grid-template-columns: 1fr; }
+    .form-card-body { padding: 18px 16px; }
+    .form-card-header { padding: 16px; }
+    .form-actions { flex-direction: column; }
+    .btn-save, .btn-cancel { width: 100%; justify-content: center; }
+  }
 </style>
 <script>
   // Toggle mutual exclusion

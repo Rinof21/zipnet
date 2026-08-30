@@ -84,7 +84,37 @@
     .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    @media (max-width: 768px) { .results-wrapper { padding-left: 16px; padding-right: 16px; } .drawer { width: 100vw; } }
+    /* RESPONSIVE DESIGN FOR MOBILE */
+    @media (max-width: 768px) {
+      .results-wrapper { padding-top: 76px; padding-left: 16px; padding-right: 16px; }
+      .drawer { width: 100vw; height: 100dvh; }
+      .result-title { font-size: 18px; }
+    }
+
+    @media (max-width: 640px) {
+      .topbar { padding: 0 12px; height: 54px; }
+      .logo-home { font-size: 42px; margin-bottom: 24px; }
+      .home-wrapper { padding: 40px 16px 20px; }
+      .home-style { padding: 10px 16px !important; }
+      
+      .search-bar-sticky { height: 56px; padding: 0 10px; gap: 8px; }
+      .logo-small { font-size: 16px; }
+      .search-input-wrap { padding: 5px 10px; gap: 6px; }
+      .search-input-wrap input { font-size: 13.5px; }
+      .search-btn { padding: 6px 12px; font-size: 12px; border-radius: 16px; }
+      .topbar-actions { gap: 6px; }
+      .login-btn { padding: 6px 12px; font-size: 12px; }
+      
+      .results-wrapper { padding-top: 68px; padding-left: 12px; padding-right: 12px; }
+      .result-title { font-size: 16px; }
+      .result-snippet { font-size: 13px; line-height: 1.5; }
+      .result-card { padding: 12px 0; }
+
+      .drawer-header { padding: 10px 12px; gap: 8px; }
+      .drawer-doc-title { font-size: 13px; }
+      .drawer-doc-sub { font-size: 11px; }
+      .drawer-open-btn { padding: 5px 10px; font-size: 11px; }
+    }
   </style>
 </head>
 

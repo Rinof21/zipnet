@@ -317,6 +317,18 @@
   .drawer-loading.hidden { opacity: 0; pointer-events: none; }
   .spinner-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,.15); border-top-color: #4ca3ff; border-radius: 50%; animation: spin .9s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-toolbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .btn-upload { width: 100%; justify-content: center; }
+    .search-bar-wrap { padding: 12px; gap: 10px; flex-direction: column; align-items: stretch; }
+    .search-input-group, .search-select-group { width: 100%; min-width: auto; }
+    .btn-search, .btn-reset { width: 100%; justify-content: center; }
+    .drawer { width: 100vw; height: 100dvh; }
+    .drawer-header { padding: 10px 12px; gap: 8px; }
+    .drawer-btn { padding: 6px 10px; font-size: 11px; }
+  }
 </style>
 @endpush
 

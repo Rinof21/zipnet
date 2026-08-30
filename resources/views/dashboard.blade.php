@@ -194,6 +194,18 @@
   .table-modern tbody tr:hover td { background: #fafbff; }
   .user-badge { display: inline-flex; align-items: center; gap: 8px; }
   .user-badge-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,#1a73e8,#4ca3ff); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .stats-grid { grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 12px; }
+    .stat-card { padding: 16px; gap: 12px; }
+    .stat-icon { width: 42px; height: 42px; font-size: 18px; }
+    .stat-value { font-size: 24px; }
+    .welcome-card { flex-direction: column; align-items: flex-start; padding: 20px; gap: 16px; }
+    .welcome-actions { width: 100%; flex-wrap: wrap; }
+    .btn-primary-white, .btn-outline-white { flex: 1; justify-content: center; text-align: center; }
+    .quick-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  }
 </style>
 @endpush
 
@@ -314,29 +326,31 @@
           <button type="button" class="btn-close-white" data-bs-dismiss="modal" aria-label="Close">✕</button>
         </div>
         <div class="modal-body" style="padding:0">
-          <table class="table-modern">
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>Nama</th>
-                <th>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach(\App\Models\User::orderBy('name')->get() as $i => $user)
+          <div class="table-responsive">
+            <table class="table-modern">
+              <thead>
                 <tr>
-                  <td style="color:#70757a;font-size:13px">{{ $i + 1 }}</td>
-                  <td>
-                    <div class="user-badge">
-                      <div class="user-badge-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
-                      {{ $user->name }}
-                    </div>
-                  </td>
-                  <td style="color:#70757a">{{ $user->email }}</td>
+                  <th>No</th>
+                  <th>Nama</th>
+                  <th>Email</th>
                 </tr>
-              @endforeach
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @foreach(\App\Models\User::orderBy('name')->get() as $i => $user)
+                  <tr>
+                    <td style="color:#70757a;font-size:13px">{{ $i + 1 }}</td>
+                    <td>
+                      <div class="user-badge">
+                        <div class="user-badge-avatar">{{ strtoupper(substr($user->name, 0, 1)) }}</div>
+                        {{ $user->name }}
+                      </div>
+                    </td>
+                    <td style="color:#70757a">{{ $user->email }}</td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
@@ -292,8 +292,10 @@
 
     /* Responsive */
     @media (max-width: 900px) {
+      body { overflow-y: auto; overflow-x: hidden; min-height: 100vh; }
       .left-panel { display: none; }
-      .right-panel { width: 100%; padding: 40px 28px; }
+      .right-panel { width: 100%; min-height: 100vh; padding: 32px 20px; justify-content: center; }
+      .form-title { font-size: 24px; }
     }
   </style>
 </head>
