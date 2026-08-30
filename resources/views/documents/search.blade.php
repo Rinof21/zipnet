@@ -533,8 +533,8 @@
                   @endif
                 </div>
                 <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#5f6368">
-                  <span style="width:22px;height:22px;border-radius:50%;background:#e8f0fe;color:#1a73e8;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0">
-                    {{ strtoupper(substr($doc->uploader->name ?? 'U', 0, 1)) }}
+                  <span style="min-width:22px;padding:0 4px;height:22px;border-radius:11px;background:#e8f0fe;color:#1a73e8;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:9.5px;flex-shrink:0">
+                    {{ $doc->uploader->initials ?? 'US' }}
                   </span>
                   <span style="white-space:nowrap">{{ $doc->uploader->name ?? '-' }}</span>
                 </div>

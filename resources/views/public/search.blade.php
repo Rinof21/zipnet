@@ -176,21 +176,21 @@
       @forelse($quickLinks ?? [] as $idx => $link)
         <a href="{{ $link->url }}" target="_blank" class="app-item">
           <div class="app-icon" style="background: {{ $gradients[$idx % count($gradients)] }}">
-            {{ strtoupper(substr($link->title, 0, 1)) }}
+            {{ $link->initials }}
           </div>
           <span class="app-label">{{ $link->title }}</span>
         </a>
       @empty
         <a href="https://silatfk.untan.ac.id" target="_blank" class="app-item">
-          <div class="app-icon" style="background: linear-gradient(135deg, #4285f4, #1a73e8)">S</div>
+          <div class="app-icon" style="background: linear-gradient(135deg, #4285f4, #1a73e8)">SI</div>
           <span class="app-label">Silat</span>
         </a>
         <a href="http://203.24.51.238:8015" target="_blank" class="app-item">
-          <div class="app-icon" style="background: linear-gradient(135deg, #34a853, #188038)">R</div>
+          <div class="app-icon" style="background: linear-gradient(135deg, #34a853, #188038)">RS</div>
           <span class="app-label">Reservasi Ruang Sidang</span>
         </a>
         <a href="https://kedokteran.untan.ac.id" target="_blank" class="app-item">
-          <div class="app-icon" style="background: linear-gradient(135deg, #fbbc04, #f9ab00)">W</div>
+          <div class="app-icon" style="background: linear-gradient(135deg, #fbbc04, #f9ab00)">WF</div>
           <span class="app-label">Website Fakultas</span>
         </a>
       @endforelse
@@ -198,7 +198,7 @@
   </div>
   @auth
     <a href="{{ route('documents.search') }}" class="user-avatar-btn" title="Dashboard Staff ({{ auth()->user()->name }})">
-      {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+      {{ auth()->user()->initials }}
     </a>
   @else
     <a href="/login" class="login-btn">Login</a>
@@ -240,21 +240,21 @@
         @forelse($quickLinks ?? [] as $idx => $link)
           <a href="{{ $link->url }}" target="_blank" class="app-item">
             <div class="app-icon" style="background: {{ $gradients[$idx % count($gradients)] }}">
-              {{ strtoupper(substr($link->title, 0, 1)) }}
+              {{ $link->initials }}
             </div>
             <span class="app-label">{{ $link->title }}</span>
           </a>
         @empty
           <a href="https://silatfk.untan.ac.id" target="_blank" class="app-item">
-            <div class="app-icon" style="background: linear-gradient(135deg, #4285f4, #1a73e8)">S</div>
+            <div class="app-icon" style="background: linear-gradient(135deg, #4285f4, #1a73e8)">SI</div>
             <span class="app-label">Silat</span>
           </a>
           <a href="http://203.24.51.238:8015" target="_blank" class="app-item">
-            <div class="app-icon" style="background: linear-gradient(135deg, #34a853, #188038)">R</div>
+            <div class="app-icon" style="background: linear-gradient(135deg, #34a853, #188038)">RS</div>
             <span class="app-label">Reservasi Ruang Sidang</span>
           </a>
           <a href="https://kedokteran.untan.ac.id" target="_blank" class="app-item">
-            <div class="app-icon" style="background: linear-gradient(135deg, #fbbc04, #f9ab00)">W</div>
+            <div class="app-icon" style="background: linear-gradient(135deg, #fbbc04, #f9ab00)">WF</div>
             <span class="app-label">Website Fakultas</span>
           </a>
         @endforelse
@@ -262,7 +262,7 @@
     </div>
     @auth
       <a href="{{ route('documents.search') }}" class="user-avatar-btn" title="Dashboard Staff ({{ auth()->user()->name }})">
-        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+        {{ auth()->user()->initials }}
       </a>
     @else
       <a href="/login" class="login-btn">Login</a>

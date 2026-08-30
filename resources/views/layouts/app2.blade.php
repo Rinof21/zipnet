@@ -376,7 +376,7 @@
             </button>
           </form>
         </div>
-        <div class="avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
+        <div class="avatar">{{ auth()->user()->initials ?? 'US' }}</div>
         <div class="avatar-info">
           <div class="avatar-name">{{ auth()->user()->name ?? 'User' }}</div>
           <div class="avatar-role">{{ auth()->user()->roles->first()?->name ?? 'Administrator' }}</div>

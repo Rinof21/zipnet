@@ -46,4 +46,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function getInitialsAttribute(): string
+    {
+        $name = trim($this->name);
+        $words = preg_split('/\s+/', $name);
+        if (count($words) >= 2) {
+            return strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[1], 0, 1));
+        }
+        return strtoupper(mb_substr($name, 0, 2));
+    }
 }
