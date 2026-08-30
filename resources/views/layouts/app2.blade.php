@@ -247,7 +247,7 @@
       border-radius: 50%;
       background: linear-gradient(135deg, var(--blue), #4ca3ff);
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; color: #fff;
+      font-size: 10.5px; font-weight: 600; color: #fff;
     }
 
     /* Page content */
@@ -402,7 +402,7 @@
         </a>
         <div style="width:1px;height:24px;background:#e8eaed" class="topbar-user-name"></div>
         <div style="font-size:13px;font-weight:500;color:#202124" class="topbar-user-name">{{ auth()->user()->name ?? 'User' }}</div>
-        <div class="topbar-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
+        <div class="topbar-avatar">{{ auth()->user()->initials ?? 'US' }}</div>
       </div>
     </header>
 
