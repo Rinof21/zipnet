@@ -12,10 +12,6 @@ use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth')->except(['preview']);
-    }
 
     protected function authorizeDocumentAccess(Document $document)
     {

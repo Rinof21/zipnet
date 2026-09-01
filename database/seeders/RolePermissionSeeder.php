@@ -33,6 +33,7 @@ class RolePermissionSeeder extends Seeder
             'kelola kategori',
             'kelola peran',
             'kelola pengguna',
+            'kelola pin',
         ];
 
         foreach ($permissions as $permission) {

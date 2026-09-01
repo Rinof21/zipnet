@@ -8,21 +8,26 @@ use App\Http\Controllers\PublicSearchController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\QuickLinkController;
+use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
 // =======================
-// PUBLIC (TANPA LOGIN)
+// PUBLIC (TANPA LOGIN / PROTEKSI PIN)
 // =======================
-Route::get('/', [PublicSearchController::class, 'index'])->name('home');
-Route::get('/arsip', [PublicSearchController::class, 'index'])->name('public.search');
 
-// Preview PDF untuk publik (tanpa login)
-Route::get('/preview/{document}', [PublicSearchController::class, 'preview'])
-    ->name('public.preview');
+// Verification PIN routes
+Route::get('/public-pin', [PublicSearchController::class, 'showPinForm'])->name('public.pin.show');
+Route::post('/public-pin', [PublicSearchController::class, 'verifyPin'])->name('public.pin.verify');
 
+// Halaman publik yang dilindungi PIN (jika fitur PIN diaktifkan)
+Route::middleware('public_pin')->group(function () {
+    Route::get('/', [PublicSearchController::class, 'index'])->name('home');
+    Route::get('/arsip', [PublicSearchController::class, 'index'])->name('public.search');
+    Route::get('/preview/{document}', [PublicSearchController::class, 'preview'])->name('public.preview');
+});
 
-// Preview dokumen untuk publik
+// Preview dokumen internal
 Route::get('/documents/{document}/preview', [DocumentController::class, 'preview'])
     ->name('documents.preview');
 
@@ -80,6 +85,12 @@ Route::middleware('auth')->group(function () {
 
     // Quick Links / Menu Titik 9 (Khusus Super Admin)
     Route::resource('quick-links', QuickLinkController::class)->middleware('role:Super Admin');
+
+    // Pengaturan PIN Publik (memerlukan izin kelola pin)
+    Route::middleware('permission:kelola pin')->group(function () {
+        Route::get('/settings/public-pin', [SettingController::class, 'publicPin'])->name('settings.public-pin');
+        Route::post('/settings/public-pin', [SettingController::class, 'updatePublicPin'])->name('settings.public-pin.update');
+    });
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

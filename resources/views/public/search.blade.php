@@ -148,6 +148,204 @@
       .drawer-doc-sub { font-size: 11px; }
       .drawer-open-btn { padding: 5px 10px; font-size: 11px; }
     }
+
+    /* PIN MODAL OVERLAY STYLES */
+    .pin-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 17, 23, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .pin-modal-backdrop.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .pin-modal-card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      background: #1a2340;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 20px;
+      padding: 32px 28px;
+      text-align: center;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      transform: translateY(20px) scale(0.96);
+      transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .pin-modal-backdrop.show .pin-modal-card {
+      transform: translateY(0) scale(1);
+    }
+
+    .pin-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s, color .15s, transform .1s;
+      z-index: 10;
+    }
+    .pin-modal-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+    .pin-modal-close:active {
+      transform: scale(0.95);
+    }
+
+    .pin-modal-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .pin-modal-logo span { color: #4ca3ff; }
+    .pin-modal-logo-icon {
+      width: 36px; height: 36px;
+      background: #1a73e8;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .pin-modal-lock-icon {
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      background: rgba(26, 115, 232, 0.15);
+      border: 2px solid rgba(26, 115, 232, 0.3);
+      color: #4ca3ff;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .pin-modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .pin-modal-sub {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    .pin-modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .pin-modal-input-wrap {
+      position: relative;
+    }
+
+    .pin-modal-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1.5px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      padding: 13px 44px 13px 16px;
+      font-size: 18px;
+      font-family: monospace, sans-serif;
+      letter-spacing: 4px;
+      color: #fff;
+      text-align: center;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .pin-modal-input:focus {
+      border-color: #4ca3ff;
+      box-shadow: 0 0 0 3px rgba(76, 163, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .pin-modal-input::placeholder {
+      letter-spacing: normal;
+      font-size: 13.5px;
+      font-family: "Inter", sans-serif;
+      color: rgba(255, 255, 255, 0.35);
+    }
+
+    .pin-modal-toggle-pwd {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pin-modal-toggle-pwd:hover { color: #fff; }
+
+    .pin-modal-btn-submit {
+      width: 100%;
+      background: #1a73e8;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: "Inter", sans-serif;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .pin-modal-btn-submit:hover { background: #1557b0; }
+    .pin-modal-btn-submit:active { transform: scale(0.99); }
+
+    .pin-modal-error {
+      display: none;
+      background: rgba(217, 48, 37, 0.2);
+      border: 1px solid rgba(217, 48, 37, 0.4);
+      color: #ff6b6b;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .pin-modal-error.show { display: block; }
+
+    .pin-modal-login-link {
+      margin-top: 20px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .pin-modal-login-link a { color: #4ca3ff; text-decoration: none; font-weight: 500; }
+    .pin-modal-login-link a:hover { text-decoration: underline; }
   </style>
 </head>
 
@@ -277,7 +475,7 @@
         $isAccessible = $doc->is_public && !$doc->is_private_to_uploader;
       @endphp
       @if($isAccessible)
-        <a href="#" class="result-card" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(asset('storage/' . $doc->file_path)) }}, {{ json_encode($doc->attachments) }}); return false;">
+        <a href="#" class="result-card" onclick="openDrawer({{ json_encode($doc->title) }}, {{ json_encode($doc->nomor_surat) }}, {{ json_encode(route('public.preview', ['document' => $doc->id, 'stream' => 1])) }}, {{ json_encode($doc->attachments) }}, {{ json_encode($doc->id) }}, {{ json_encode(route('public.preview', $doc->id)) }}); return false;">
           <div class="result-url">cariarsip › arsip › {{ Str::slug($doc->title) }}</div>
           <div class="result-title">{{ $doc->title }}</div>
           <div class="result-snippet">
@@ -290,7 +488,7 @@
           <div class="result-date">{{ $doc->tanggal_surat ? $doc->tanggal_surat->format('d M Y') : '' }}</div>
         </a>
       @else
-        <div class="result-card" onclick="alert('🔒 Dokumen ini bersifat {{ $doc->is_private_to_uploader ? 'Private' : 'Internal' }}.\nFile PDF tidak dapat dibuka tanpa login sebagai pengelola yang berhak.'); return false;" style="opacity:.85">
+        <div class="result-card" onclick="showRestrictedNotice({{ json_encode($doc->is_private_to_uploader ? 'Private' : 'Internal') }}); return false;" style="opacity:.85">
           <div class="result-url">cariarsip › arsip › {{ Str::slug($doc->title) }}</div>
           <div class="result-title" style="color:#5f6368">{{ $doc->title }}</div>
           <div class="result-snippet">
@@ -338,6 +536,79 @@
 
 @endif
 
+{{-- PIN VERIFICATION MODAL --}}
+<div class="pin-modal-backdrop" id="pinModalBackdrop" onclick="closePinModalOnBackdrop(event)">
+  <div class="pin-modal-card">
+    <button type="button" class="pin-modal-close" onclick="closePinModal()" aria-label="Tutup">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="pin-modal-logo">
+      <div class="pin-modal-logo-icon">📁</div>
+      <div>cari<span>Arsip</span></div>
+    </div>
+
+    <div class="pin-modal-lock-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+
+    <h2 class="pin-modal-title" id="pinModalTitle">Akses Terproteksi PIN</h2>
+    <p class="pin-modal-sub" id="pinModalSub">Masukkan PIN keamanan untuk mengakses pencarian dan file dokumen publik.</p>
+
+    <div class="pin-modal-error" id="pinModalError"></div>
+
+    <form id="pinModalForm" onsubmit="submitPinModal(event)" class="pin-modal-form">
+      @csrf
+      <div class="pin-modal-input-wrap">
+        <input type="password" name="pin" id="pinModalInput" class="pin-modal-input" placeholder="Masukkan PIN" required autocomplete="off">
+        <button type="button" class="pin-modal-toggle-pwd" id="pinModalToggleBtn" title="Tampilkan PIN">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+
+      <button type="submit" class="pin-modal-btn-submit" id="pinModalSubmitBtn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span>Verifikasi PIN</span>
+      </button>
+    </form>
+
+    <div class="pin-modal-login-link">
+      Pengelola Sistem? <a href="{{ route('login') }}">Login Pengelola</a>
+    </div>
+  </div>
+</div>
+
+{{-- RESTRICTED ACCESS NOTICE MODAL --}}
+<div class="pin-modal-backdrop" id="noticeModalBackdrop" onclick="closeNoticeModalOnBackdrop(event)">
+  <div class="pin-modal-card" style="max-width: 440px;">
+    <button type="button" class="pin-modal-close" onclick="closeNoticeModal()" aria-label="Tutup">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+
+    <div class="pin-modal-lock-icon" style="background: rgba(234, 67, 53, 0.15); border-color: rgba(234, 67, 53, 0.3); color: #ff6b6b;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+
+    <h2 class="pin-modal-title" id="noticeModalTitle">Dokumen Terbatas</h2>
+    
+    <div style="margin: 10px 0 16px;">
+      <span id="noticeModalBadge" style="display:inline-block; padding: 4px 14px; border-radius: 12px; font-size: 12px; font-weight: 600; background: rgba(234, 67, 53, 0.2); color: #ff6b6b; border: 1px solid rgba(234, 67, 53, 0.3);">🔒 Akses Private</span>
+    </div>
+
+    <p class="pin-modal-sub" id="noticeModalSub" style="margin-bottom: 24px;">File PDF ini bersifat terbatas dan tidak dapat dibuka tanpa login sebagai pengelola yang berhak.</p>
+
+    <div style="display: flex; gap: 10px; width: 100%;">
+      <button type="button" onclick="closeNoticeModal()" style="flex:1; background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 12px; font-size: 13.5px; font-weight: 500; font-family: 'Inter', sans-serif; cursor: pointer; transition: background .15s;">
+        Tutup
+      </button>
+      <a href="{{ route('login') }}" style="flex:1.3; background: #1a73e8; color: #fff; border: none; border-radius: 12px; padding: 12px; font-size: 13.5px; font-weight: 600; font-family: 'Inter', sans-serif; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background .15s;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Login Pengelola
+      </a>
+    </div>
+  </div>
+</div>
+
 <script>
   function setupMenu(btnId, menuId) {
     const btn = document.getElementById(btnId);
@@ -349,6 +620,148 @@
   setupMenu('menuToggle', 'menuDropdown');
   setupMenu('menuToggle2', 'menuDropdown2');
 
+  let pendingDrawerArgs = null;
+  let isPinVerified = @json((bool) session('public_pin_verified') || (bool) auth()->check());
+
+  const pinModalBackdrop  = document.getElementById('pinModalBackdrop');
+  const pinModalInput     = document.getElementById('pinModalInput');
+  const pinModalError     = document.getElementById('pinModalError');
+  const pinModalForm      = document.getElementById('pinModalForm');
+  const pinModalSubmitBtn = document.getElementById('pinModalSubmitBtn');
+
+  function openPinModal(title = 'Akses Terproteksi PIN', sub = 'Masukkan PIN keamanan untuk melanjutkan.') {
+    if (!pinModalBackdrop) return;
+    if (title) document.getElementById('pinModalTitle').textContent = title;
+    if (sub) document.getElementById('pinModalSub').textContent = sub;
+    if (pinModalError) {
+      pinModalError.classList.remove('show');
+      pinModalError.textContent = '';
+    }
+    if (pinModalInput) pinModalInput.value = '';
+    pinModalBackdrop.classList.add('show');
+    setTimeout(() => { if (pinModalInput) pinModalInput.focus(); }, 150);
+  }
+
+  function closePinModal() {
+    if (pinModalBackdrop) pinModalBackdrop.classList.remove('show');
+    pendingDrawerArgs = null;
+  }
+
+  function closePinModalOnBackdrop(e) {
+    if (e.target === pinModalBackdrop) {
+      closePinModal();
+    }
+  }
+
+  const noticeModalBackdrop = document.getElementById('noticeModalBackdrop');
+  const noticeModalTitle    = document.getElementById('noticeModalTitle');
+  const noticeModalBadge    = document.getElementById('noticeModalBadge');
+  const noticeModalSub      = document.getElementById('noticeModalSub');
+
+  function showRestrictedNotice(accessType) {
+    if (!noticeModalBackdrop) return;
+    const isPrivate = accessType === 'Private';
+    noticeModalTitle.textContent = isPrivate ? 'Dokumen Bersifat Private' : 'Dokumen Akses Internal';
+    noticeModalBadge.textContent = isPrivate ? '🔒 Akses Private (Pengupload)' : '🔒 Akses Terbatas (Internal)';
+    noticeModalBadge.style.background = isPrivate ? 'rgba(234, 67, 53, 0.2)' : 'rgba(251, 188, 4, 0.2)';
+    noticeModalBadge.style.borderColor = isPrivate ? 'rgba(234, 67, 53, 0.4)' : 'rgba(251, 188, 4, 0.4)';
+    noticeModalBadge.style.color = isPrivate ? '#ff6b6b' : '#fbbc04';
+
+    noticeModalSub.textContent = isPrivate
+      ? 'Dokumen ini bersifat rahasia dan hanya dapat diakses oleh pengupload atau Super Admin. Silakan login ke dalam sistem.'
+      : 'Dokumen ini hanya dapat diakses oleh staf/pengelola terdaftar. Silakan login ke dalam sistem untuk membaca file ini.';
+
+    noticeModalBackdrop.classList.add('show');
+  }
+
+  function closeNoticeModal() {
+    if (noticeModalBackdrop) noticeModalBackdrop.classList.remove('show');
+  }
+
+  function closeNoticeModalOnBackdrop(e) {
+    if (e.target === noticeModalBackdrop) {
+      closeNoticeModal();
+    }
+  }
+
+  // Toggle Pwd Visibility
+  const toggleBtn = document.getElementById('pinModalToggleBtn');
+  if (toggleBtn && pinModalInput) {
+    toggleBtn.addEventListener('click', () => {
+      const type = pinModalInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      pinModalInput.setAttribute('type', type);
+    });
+  }
+
+  async function submitPinModal(e) {
+    e.preventDefault();
+    const pin = pinModalInput.value.trim();
+    if (!pin) return;
+
+    pinModalSubmitBtn.disabled = true;
+    pinModalSubmitBtn.style.opacity = '.7';
+    if (pinModalError) pinModalError.classList.remove('show');
+
+    try {
+      const response = await fetch("{{ route('public.pin.verify') }}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ pin: pin })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        isPinVerified = true;
+        closePinModal();
+
+        // If there was a pending drawer preview, open it!
+        if (pendingDrawerArgs) {
+          const args = pendingDrawerArgs;
+          pendingDrawerArgs = null;
+          executeOpenDrawer(...args);
+        } else {
+          // If modal was opened on page load, refresh page
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.has('modal')) {
+            urlParams.delete('modal');
+            const newSearch = urlParams.toString();
+            const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '');
+            window.location.href = newUrl;
+          }
+        }
+      } else {
+        if (pinModalError) {
+          pinModalError.textContent = data.message || 'PIN yang Anda masukkan salah!';
+          pinModalError.classList.add('show');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      if (pinModalError) {
+        pinModalError.textContent = 'Terjadi kesalahan koneksi. Silakan coba lagi.';
+        pinModalError.classList.add('show');
+      }
+    } finally {
+      pinModalSubmitBtn.disabled = false;
+      pinModalSubmitBtn.style.opacity = '1';
+    }
+  }
+
+  // Check if modal should open on page load
+  const isSearchPinActive  = @json((string)\App\Models\Setting::get('public_pin_enabled', '0') === '1');
+  const isPreviewPinActive = @json((string)\App\Models\Setting::get('public_preview_pin_enabled', '0') === '1');
+  const urlParams = new URLSearchParams(window.location.search);
+  const shouldOpenOnLoad = urlParams.has('modal') || (isSearchPinActive && !isPinVerified);
+
+  if (shouldOpenOnLoad && !isPinVerified) {
+    openPinModal('Akses Publik Terproteksi', 'Masukkan PIN keamanan untuk mengakses pencarian dan file dokumen publik.');
+  }
+
   const drawer = document.getElementById('pdfDrawer');
   const overlay = document.getElementById('drawerOverlay');
   const frame = document.getElementById('pdfFrame');
@@ -358,11 +771,20 @@
   const openLink = document.getElementById('drawerOpenLink');
   const fileSelector = document.getElementById('drawerFileSelector');
 
-  function openDrawer(title, nomor, primaryPdfUrl, attachments = []) {
+  function openDrawer(title, nomor, primaryPdfUrl, attachments = [], docId = null, previewRouteUrl = '') {
+    if (isPreviewPinActive && !isPinVerified) {
+      pendingDrawerArgs = [title, nomor, primaryPdfUrl, attachments, docId, previewRouteUrl];
+      openPinModal('Proteksi Preview Dokumen', 'Masukkan PIN keamanan untuk membuka dan membaca file dokumen ini.');
+      return;
+    }
+    executeOpenDrawer(title, nomor, primaryPdfUrl, attachments, docId, previewRouteUrl);
+  }
+
+  function executeOpenDrawer(title, nomor, primaryPdfUrl, attachments = [], docId = null, previewRouteUrl = '') {
     if (!drawer) return;
     titleEl.textContent = title;
     subEl.textContent = 'Nomor Surat: ' + nomor;
-    if (openLink) openLink.href = primaryPdfUrl;
+    if (openLink) openLink.href = previewRouteUrl || primaryPdfUrl;
 
     // Build file switcher pills
     if (fileSelector) {
@@ -374,16 +796,16 @@
         const mainPill = document.createElement('button');
         mainPill.style.cssText = 'padding:5px 12px;border-radius:16px;font-size:12px;font-weight:600;border:1px solid #1a73e8;background:#1a73e8;color:#fff;cursor:pointer;white-space:nowrap';
         mainPill.textContent = '📄 Surat Utama';
-        mainPill.onclick = () => switchPublicFile(primaryPdfUrl, mainPill);
+        mainPill.onclick = () => switchPublicFile(primaryPdfUrl, mainPill, previewRouteUrl);
         fileSelector.appendChild(mainPill);
 
         // Attachment files
         attachments.forEach((att, i) => {
-          const attUrl = '/storage/' + att.file_path;
+          const attUrl = '/preview/' + docId + '?attachment_id=' + att.id;
           const attPill = document.createElement('button');
           attPill.style.cssText = 'padding:5px 12px;border-radius:16px;font-size:12px;font-weight:500;border:1px solid #dadce0;background:#fff;color:#5f6368;cursor:pointer;white-space:nowrap';
           attPill.textContent = '📎 Lampiran ' + (i + 1) + ': ' + att.file_name;
-          attPill.onclick = () => switchPublicFile(attUrl, attPill);
+          attPill.onclick = () => switchPublicFile(attUrl, attPill, attUrl);
           fileSelector.appendChild(attPill);
         });
       } else {
@@ -399,7 +821,7 @@
     setTimeout(() => { if (frame) frame.src = primaryPdfUrl; }, 250);
   }
 
-  function switchPublicFile(url, activePill) {
+  function switchPublicFile(url, activePill, openFullUrl = '') {
     if (fileSelector) {
       fileSelector.querySelectorAll('button').forEach(b => {
         b.style.background = '#fff';
@@ -410,7 +832,7 @@
     activePill.style.background = '#1a73e8';
     activePill.style.color = '#fff';
     activePill.style.borderColor = '#1a73e8';
-    if (openLink) openLink.href = url;
+    if (openLink) openLink.href = openFullUrl || url;
     if (loading) loading.style.display = 'flex';
     if (frame) frame.src = url;
   }
@@ -427,7 +849,13 @@
     if (loading) loading.style.display = 'none';
   }
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closePinModal();
+      closeNoticeModal();
+      closeDrawer();
+    }
+  });
 </script>
 
 </body>

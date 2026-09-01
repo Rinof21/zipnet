@@ -237,11 +237,11 @@
     padding: 32px 20px;
     text-align: center;
     cursor: pointer;
-    transition: border-color .2s, background .2s;
+    transition: border-color .2s, background .2s, box-shadow .2s;
     position: relative;
     background: #fafafa;
   }
-  .file-zone:hover { border-color: #1a73e8; background: #e8f0fe1a; }
+  .file-zone:hover, .file-zone.drag-over { border-color: #1a73e8; background: #e8f0fe4d; box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.1); }
   .file-zone.has-file { border-color: #188038; background: #e6f4ea33; }
 
   .file-zone input[type="file"] {
@@ -642,31 +642,83 @@
     }
   }
 
-  // File input display
+  // File input display & drag-and-drop
   const fileInput   = document.getElementById('fileInput');
   const fileZone    = document.getElementById('fileZone');
   const fileDisplay = document.getElementById('fileNameDisplay');
   const fileNameTxt = document.getElementById('fileNameText');
 
+  function updateFileDisplay(file) {
+    if (file) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      fileNameTxt.textContent = `${file.name} (${sizeMB} MB)`;
+      fileDisplay.classList.add('show');
+      fileZone.classList.add('has-file');
+    } else {
+      fileNameTxt.textContent = '';
+      fileDisplay.classList.remove('show');
+      fileZone.classList.remove('has-file');
+    }
+  }
+
   if (fileInput) {
     fileInput.addEventListener('change', () => {
-      if (fileInput.files.length > 0) {
-        const name = fileInput.files[0].name;
-        fileNameTxt.textContent = name;
-        fileDisplay.classList.add('show');
-        fileZone.classList.add('has-file');
+      if (fileInput.files && fileInput.files.length > 0) {
+        updateFileDisplay(fileInput.files[0]);
       } else {
-        fileDisplay.classList.remove('show');
-        fileZone.classList.remove('has-file');
+        updateFileDisplay(null);
       }
     });
   }
 
-  // Drag & drop visual
-  if (fileZone) {
-    fileZone.addEventListener('dragover', e => { e.preventDefault(); fileZone.style.borderColor = '#1a73e8'; });
-    fileZone.addEventListener('dragleave', () => { fileZone.style.borderColor = ''; });
-    fileZone.addEventListener('drop', () => { fileZone.style.borderColor = ''; });
+  // Drag & drop logic
+  if (fileZone && fileInput) {
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      fileZone.addEventListener(eventName, e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      fileZone.addEventListener(eventName, () => {
+        fileZone.classList.add('drag-over');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      fileZone.addEventListener(eventName, () => {
+        fileZone.classList.remove('drag-over');
+      }, false);
+    });
+
+    fileZone.addEventListener('drop', e => {
+      const dt = e.dataTransfer;
+      if (dt && dt.files && dt.files.length > 0) {
+        const file = dt.files[0];
+        
+        // Validate PDF extension/type
+        if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+          alert('File yang diseret harus berformat PDF!');
+          return;
+        }
+
+        // Validate max size 10MB
+        if (file.size > 10 * 1024 * 1024) {
+          alert('Ukuran file maksimal adalah 10 MB!');
+          return;
+        }
+
+        try {
+          const container = new DataTransfer();
+          container.items.add(file);
+          fileInput.files = container.files;
+          fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+        } catch (err) {
+          console.error('Error setting dropped file:', err);
+        }
+      }
+    }, false);
   }
 
   // Live tags preview
@@ -699,6 +751,8 @@
       btnSave.disabled = true;
       btnSave.style.opacity = '.75';
     });
+  }
+
   // Toggle mutual exclusion
   const publicToggle  = document.querySelector('input[name="is_public"]');
   const privateToggle = document.querySelector('input[name="is_private_to_uploader"]');
