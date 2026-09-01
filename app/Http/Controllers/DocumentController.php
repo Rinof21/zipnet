@@ -137,7 +137,15 @@ class DocumentController extends Controller
     protected function authorizeDocumentEdit(Document $document)
     {
         $user = Auth::user();
-        if ($user && $document->uploaded_by !== $user->id && !$user->hasRole('Super Admin')) {
+        if (!$user) {
+            abort(403);
+        }
+
+        if (!$user->can('edit dokumen')) {
+            abort(403, 'Anda tidak memiliki izin (permission) untuk mengedit dokumen.');
+        }
+
+        if ($document->uploaded_by !== $user->id && !$user->hasRole('Super Admin')) {
             abort(403, 'Anda hanya dapat mengedit dokumen yang Anda unggah sendiri.');
         }
     }
@@ -145,7 +153,15 @@ class DocumentController extends Controller
     protected function authorizeDocumentDelete(Document $document)
     {
         $user = Auth::user();
-        if ($user && $document->uploaded_by !== $user->id && !$user->hasRole('Super Admin')) {
+        if (!$user) {
+            abort(403);
+        }
+
+        if (!$user->can('hapus dokumen')) {
+            abort(403, 'Anda tidak memiliki izin (permission) untuk menghapus dokumen.');
+        }
+
+        if ($document->uploaded_by !== $user->id && !$user->hasRole('Super Admin')) {
             abort(403, 'Anda tidak memiliki hak untuk menghapus dokumen milik pengupload lain.');
         }
     }
@@ -250,8 +266,12 @@ class DocumentController extends Controller
 
     public function trash(Request $request)
     {
-        $q = trim($request->q);
         $user = Auth::user();
+        if (!$user || !$user->can('hapus dokumen')) {
+            abort(403, 'Anda tidak memiliki izin untuk mengakses tempat sampah dokumen.');
+        }
+
+        $q = trim($request->q);
 
         $documents = Document::onlyTrashed()
             ->with(['category', 'uploader', 'attachments'])

@@ -570,16 +570,23 @@
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
-                    @if(($isOwnDoc || auth()->user()->hasRole('Super Admin')) && auth()->user()->can('edit dokumen'))
+                    @php
+                      $canEditDoc = ($isOwnDoc || auth()->user()->hasRole('Super Admin')) && auth()->user()->can('edit dokumen');
+                      $canDeleteDoc = ($isOwnDoc || auth()->user()->hasRole('Super Admin')) && auth()->user()->can('hapus dokumen');
+                    @endphp
+                    @if($canEditDoc || $canDeleteDoc)
                     <div class="action-dropdown-wrap">
                       <button type="button" class="btn-action btn-menu" title="Menu Opsi" onclick="toggleActionMenu(event, 'dt-{{ $doc->id }}')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
                       </button>
                       <div id="actionMenu-dt-{{ $doc->id }}" class="action-dropdown-menu">
+                        @if($canEditDoc)
                         <a href="{{ route('documents.edit', $doc->id) }}" class="action-dropdown-item">
                           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                           Edit Dokumen
                         </a>
+                        @endif
+                        @if($canDeleteDoc)
                         <form action="{{ route('documents.destroy', $doc->id) }}" method="POST" style="margin:0" onsubmit="return confirm('Pindahkan dokumen {{ json_encode($doc->title) }} ke Tempat Sampah?')">
                           @csrf
                           @method('DELETE')
@@ -588,6 +595,7 @@
                             Hapus Dokumen
                           </button>
                         </form>
+                        @endif
                       </div>
                     </div>
                     @endif
@@ -662,16 +670,19 @@
                 <span style="font-size:12px;font-weight:600">Pratinjau</span>
               </button>
 
-              @if(($isOwnDoc || auth()->user()->hasRole('Super Admin')) && auth()->user()->can('edit dokumen'))
+              @if($canEditDoc || $canDeleteDoc)
                 <div class="action-dropdown-wrap">
                   <button type="button" class="btn-action btn-menu" title="Menu Opsi" onclick="toggleActionMenu(event, 'mb-{{ $doc->id }}')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
                   </button>
                   <div id="actionMenu-mb-{{ $doc->id }}" class="action-dropdown-menu">
+                    @if($canEditDoc)
                     <a href="{{ route('documents.edit', $doc->id) }}" class="action-dropdown-item">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                       Edit Dokumen
                     </a>
+                    @endif
+                    @if($canDeleteDoc)
                     <form action="{{ route('documents.destroy', $doc->id) }}" method="POST" style="margin:0" onsubmit="return confirm('Pindahkan dokumen {{ json_encode($doc->title) }} ke Tempat Sampah?')">
                       @csrf
                       @method('DELETE')
@@ -680,6 +691,7 @@
                         Hapus Dokumen
                       </button>
                     </form>
+                    @endif
                   </div>
                 </div>
               @endif
