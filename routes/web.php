@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/documents/{id}', [DocumentController::class, 'update'])->middleware('permission:edit dokumen')->name('documents.update');
 
     // Lampiran dokumen
+    Route::get('/documents/attachments/{attachment}/preview', [DocumentController::class, 'previewAttachment'])->name('documents.attachments.preview');
     Route::get('/documents/attachments/{attachment}/download', [DocumentController::class, 'downloadAttachment'])->name('documents.attachments.download');
     Route::delete('/documents/attachments/{attachment}', [DocumentController::class, 'destroyAttachment'])->middleware('permission:edit dokumen')->name('documents.attachments.destroy');
 

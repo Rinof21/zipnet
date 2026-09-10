@@ -578,15 +578,42 @@
             @error('file') <div class="field-error-msg">⚠ {{ $message }}</div> @enderror
           </div>
 
-          {{-- Lampiran Tambahan --}}
-          <div class="field-group" style="margin-top:20px">
-            <label class="field-label" for="attachmentInput">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57a4 4 0 1 1 5.66 5.66l-8.59 8.58a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-              Lampiran Tambahan (Opsional — Bisa pilih beberapa file sekaligus)
-            </label>
-            <input type="file" name="attachments[]" id="attachmentInput" multiple class="field-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" onchange="displayAttachmentNames(this)">
-            <div class="field-hint">Format didukung: PDF, Word, Excel, Gambar (Maks 10MB per file)</div>
-            <div id="attachmentList" style="display:flex;flex-direction:column;gap:6px;margin-top:10px"></div>
+          {{-- Lampiran Tambahan (File & Link) --}}
+          <div class="field-group" style="margin-top:24px;background:#f8f9fa;border:1.5px solid #e8eaed;border-radius:12px;padding:18px">
+            <div style="font-size:13.5px;font-weight:700;color:#202124;margin-bottom:14px;display:flex;align-items:center;gap:6px">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57a4 4 0 1 1 5.66 5.66l-8.59 8.58a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              Lampiran Tambahan (Opsional)
+            </div>
+
+            {{-- Opsi 1: Lampiran File --}}
+            <div style="margin-bottom:18px">
+              <label class="field-label" style="font-size:12.5px;color:#3c4043">
+                📄 Lampiran Berupa File (PDF, Word, Excel, Gambar — Maks 10MB per file)
+              </label>
+              <div id="fileAttachmentsContainer" style="display:flex;flex-direction:column;gap:10px">
+                {{-- File rows inserted dynamically --}}
+              </div>
+
+              <button type="button" id="btnAddFileRow" onclick="createFileRow()" style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px dashed #1a73e8;color:#1a73e8;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#e8f0fe'" onmouseout="this.style.background='#fff'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Tambah File Lampiran
+              </button>
+            </div>
+
+            {{-- Opsi 2: Lampiran Link --}}
+            <div style="border-top:1px dashed #dadce0;padding-top:16px">
+              <label class="field-label" style="font-size:12.5px;color:#3c4043">
+                🔗 Lampiran Berupa Link / URL (Misal Google Drive, Website, Dokumen Online)
+              </label>
+              <div id="linkAttachmentsContainer" style="display:flex;flex-direction:column;gap:10px">
+                {{-- Link rows inserted dynamically --}}
+              </div>
+
+              <button type="button" id="btnAddLinkRow" onclick="createLinkRow()" style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px dashed #1a73e8;color:#1a73e8;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#e8f0fe'" onmouseout="this.style.background='#fff'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Tambah Link Lampiran
+              </button>
+            </div>
           </div>
 
           {{-- Actions --}}
@@ -610,6 +637,49 @@
 
 @push('scripts')
 <script>
+  // Dynamic File Attachments
+  function createFileRow() {
+    const container = document.getElementById('fileAttachmentsContainer');
+    if (!container) return;
+    const row = document.createElement('div');
+    row.className = 'attachment-input-row';
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 36px;gap:10px;align-items:center;background:#fff;border:1px solid #e8eaed;padding:10px;border-radius:8px';
+
+    row.innerHTML = `
+      <div>
+        <input type="file" name="attachments[]" class="field-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" style="font-size:13px;padding:7px 12px" required>
+      </div>
+      <button type="button" class="btn-remove-file" title="Hapus File" onclick="this.closest('.attachment-input-row').remove()" style="width:36px;height:36px;border:none;background:#fce8e6;color:#d93025;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+
+    container.appendChild(row);
+  }
+
+  // Dynamic Link Attachments
+  function createLinkRow(initialTitle = '', initialUrl = '') {
+    const container = document.getElementById('linkAttachmentsContainer');
+    if (!container) return;
+    const row = document.createElement('div');
+    row.className = 'attachment-input-row';
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 1.5fr 36px;gap:10px;align-items:center;background:#fff;border:1px solid #e8eaed;padding:10px;border-radius:8px';
+
+    row.innerHTML = `
+      <div>
+        <input type="text" name="link_titles[]" class="field-input" placeholder="Judul / Nama Link (opsional)" value="${initialTitle}" style="font-size:13px;padding:8px 12px">
+      </div>
+      <div>
+        <input type="url" name="link_urls[]" class="field-input" placeholder="URL Link (https://...)" value="${initialUrl}" style="font-size:13px;padding:8px 12px" required>
+      </div>
+      <button type="button" class="btn-remove-link" title="Hapus Link" onclick="this.closest('.attachment-input-row').remove()" style="width:36px;height:36px;border:none;background:#fce8e6;color:#d93025;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+
+    container.appendChild(row);
+  }
+
   // Toggle add category form
   const btnTambah = document.getElementById('btnTambahKategori');
   const formTambah = document.getElementById('formTambahKategori');
@@ -626,20 +696,6 @@
       formTambah.classList.remove('show');
       btnTambah.style.display = 'flex';
     });
-  }
-
-  function displayAttachmentNames(input) {
-    const container = document.getElementById('attachmentList');
-    if (!container) return;
-    container.innerHTML = '';
-    if (input.files && input.files.length > 0) {
-      Array.from(input.files).forEach((file, idx) => {
-        const chip = document.createElement('div');
-        chip.style.cssText = 'font-size:12.5px;color:#174ea6;background:#e8f0fe;padding:6px 12px;border-radius:8px;display:flex;align-items:center;gap:6px;width:fit-content';
-        chip.innerHTML = '📎 <strong>Lampiran ' + (idx + 1) + ':</strong> ' + file.name + ' <span style="color:#70757a">(' + (file.size / 1024 / 1024).toFixed(2) + ' MB)</span>';
-        container.appendChild(chip);
-      });
-    }
   }
 
   // File input display & drag-and-drop

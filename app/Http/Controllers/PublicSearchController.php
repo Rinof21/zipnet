@@ -94,6 +94,9 @@ class PublicSearchController extends Controller
         // Handle attachment stream
         if ($request->has('attachment_id')) {
             $attachment = $document->attachments()->where('id', $request->attachment_id)->firstOrFail();
+            if ($attachment->isLink()) {
+                return redirect()->away($attachment->link_url ?: $attachment->file_path);
+            }
             $filePath = storage_path('app/public/' . $attachment->file_path);
             if (!file_exists($filePath)) {
                 abort(404, 'File lampiran tidak ditemukan.');

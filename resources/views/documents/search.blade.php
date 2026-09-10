@@ -786,12 +786,19 @@
 
       // Attachment pills
       attachments.forEach((att, i) => {
-        const attUrl = '/storage/' + att.file_path;
+        const isLink = att.is_link || att.file_type === 'link' || (att.file_path && (att.file_path.startsWith('http://') || att.file_path.startsWith('https://')));
+        const attUrl = isLink ? (att.link_url || att.file_path) : ('/storage/' + att.file_path);
         const attPill = document.createElement('button');
         attPill.className = 'pill-file';
         attPill.style.cssText = 'padding:5px 12px;border-radius:16px;font-size:12px;font-weight:500;border:1px solid #dadce0;background:#fff;color:#5f6368;cursor:pointer;white-space:nowrap';
-        attPill.textContent = '📎 Lampiran ' + (i + 1) + ': ' + att.file_name;
-        attPill.onclick = () => switchFile(attUrl, attPill);
+        attPill.textContent = (isLink ? '🔗 Link: ' : ('📎 Lampiran ' + (i + 1) + ': ')) + att.file_name;
+        attPill.onclick = () => {
+          if (isLink) {
+            window.open(attUrl, '_blank');
+          } else {
+            switchFile(attUrl, attPill);
+          }
+        };
         fileSelector.appendChild(attPill);
       });
     } else {

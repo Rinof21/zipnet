@@ -12,7 +12,18 @@ class DocumentAttachment extends Model
         'file_path',
         'file_size',
         'file_type',
+        'is_link',
+        'link_url',
     ];
+
+    protected $casts = [
+        'is_link' => 'boolean',
+    ];
+
+    public function isLink()
+    {
+        return $this->is_link || $this->file_type === 'link';
+    }
 
     public function document()
     {

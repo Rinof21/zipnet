@@ -127,31 +127,28 @@
   .switch-slider::before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: #ffffff; transition: transform .2s ease; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
   .switch-wrap input:checked + .switch-slider { background-color: #1a73e8; }
   .switch-wrap input:checked + .switch-slider::before { transform: translateX(22px); }
-  /* Responsive */
-  @media (max-width: 900px) {
-    .edit-layout { grid-template-columns: 1fr; }
-    .info-card { position: static; }
-    .form-row-2 { grid-template-columns: 1fr; }
-    .form-card-body { padding: 18px 16px; }
-    .form-card-header { padding: 16px; }
-    .form-actions { flex-direction: column; }
-    .btn-save, .btn-cancel { width: 100%; justify-content: center; }
-  }
+  /* ===== RIGHT DRAWER ===== */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 500; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  .drawer-overlay.active { opacity: 1; pointer-events: all; }
+  .drawer { position: fixed; top: 0; right: 0; width: min(820px, 100vw); height: 100vh; background: #fff; z-index: 600; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: -6px 0 40px rgba(0,0,0,.2); }
+  .drawer.open { transform: translateX(0); }
+  .drawer-header { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #e8eaed; flex-shrink: 0; background: #fff; }
+  .drawer-close { width: 36px; height: 36px; border: none; background: transparent; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368; transition: background .15s; flex-shrink: 0; }
+  .drawer-close:hover { background: #f1f3f4; }
+  .drawer-title-info { flex: 1; min-width: 0; }
+  .drawer-doc-title { font-size: 14px; font-weight: 700; color: #202124; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-doc-sub { font-size: 12px; color: #70757a; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .drawer-header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .drawer-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; font-family: "Inter", sans-serif; text-decoration: none; cursor: pointer; border: 1px solid #dadce0; background: #fff; color: #5f6368; transition: background .15s; white-space: nowrap; }
+  .drawer-btn:hover { background: #f1f3f4; color: #202124; }
+  .drawer-body { flex: 1; overflow: hidden; background: #525659; position: relative; }
+  .drawer-body iframe { width: 100%; height: 100%; border: none; }
+  .drawer-loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: rgba(255,255,255,.8); font-size: 14px; background: #525659; z-index: 2; transition: opacity .3s; }
+  .drawer-loading.hidden { opacity: 0; pointer-events: none; }
+  .spinner-ring { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,.15); border-top-color: #4ca3ff; border-radius: 50%; animation: spin .9s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 768px) { .drawer { width: 100vw; } }
 </style>
-<script>
-  // Toggle mutual exclusion
-  const publicToggle  = document.querySelector('input[name="is_public"]');
-  const privateToggle = document.querySelector('input[name="is_private_to_uploader"]');
-  if (publicToggle && privateToggle) {
-    privateToggle.addEventListener('change', function() {
-      if (this.checked) publicToggle.checked = false;
-    });
-    publicToggle.addEventListener('change', function() {
-      if (this.checked) privateToggle.checked = false;
-    });
-  }
-</script>
-<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 @endpush
 
 @section('content')
@@ -207,10 +204,10 @@
           </div>
         </div>
 
-        <a href="{{ route('documents.preview', $document->id) }}" class="btn-preview-small" target="_blank">
+        <button type="button" class="btn-preview-small" onclick="openDrawer({{ json_encode($document->title) }}, {{ json_encode('Nomor Surat: ' . ($document->nomor_surat ?: '-')) }}, {{ json_encode(route('documents.preview', ['document' => $document->id, 'stream' => 1])) }}, {{ json_encode(route('documents.preview', $document->id)) }})">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
           Preview Dokumen
-        </a>
+        </button>
 
         {{-- Meta info --}}
         <div class="info-divider"></div>
@@ -363,23 +360,34 @@
           <div class="form-section-label">Lampiran Dokumen Tambahan</div>
 
           @if($document->attachments && $document->attachments->count() > 0)
-            <div style="margin-bottom:18px;display:flex;flex-direction:column;gap:8px">
+            <div style="margin-bottom:20px;display:flex;flex-direction:column;gap:8px">
               <div style="font-size:12.5px;font-weight:600;color:#5f6368">Lampiran Tersimpan:</div>
               @foreach($document->attachments as $att)
                 <div style="background:#f8f9fa;border:1px solid #e8eaed;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
                   <div style="display:flex;align-items:center;gap:8px;min-width:0">
-                    <span style="font-size:16px">📎</span>
+                    <span style="font-size:16px">{{ $att->isLink() ? '🔗' : '📎' }}</span>
                     <div style="min-width:0">
                       <div style="font-size:13px;font-weight:600;color:#202124;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $att->file_name }}</div>
-                      <div style="font-size:11px;color:#70757a">{{ number_format($att->file_size / 1024, 1) }} KB</div>
+                      @if($att->isLink())
+                        <div style="font-size:11px;color:#1a73e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $att->link_url ?: $att->file_path }}</div>
+                      @else
+                        <div style="font-size:11px;color:#70757a">{{ number_format($att->file_size / 1024, 1) }} KB</div>
+                      @endif
                     </div>
                   </div>
                   <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-                    <a href="{{ route('documents.attachments.download', $att->id) }}" class="btn-action btn-view" title="Unduh Lampiran" style="width:auto;padding:5px 10px;font-size:12px;text-decoration:none;gap:4px">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                      Unduh
-                    </a>
-                    <button type="button" class="btn-action btn-delete" title="Hapus Lampiran" style="width:auto;padding:5px 10px;font-size:12px;gap:4px" onclick="if(confirm('Hapus lampiran {{ $att->file_name }}?')) document.getElementById('del-att-{{ $att->id }}').submit();">
+                    @if($att->isLink())
+                      <a href="{{ $att->link_url ?: $att->file_path }}" target="_blank" rel="noopener" class="btn-action btn-view" title="Buka Link" style="width:auto;padding:5px 10px;font-size:12px;text-decoration:none;gap:4px">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                        Buka Link
+                      </a>
+                    @else
+                      <button type="button" class="btn-action btn-view" title="Preview Lampiran" style="width:auto;padding:5px 10px;font-size:12px;gap:4px;background:#e8f0fe;color:#1a73e8;border:none;border-radius:6px;cursor:pointer" onclick="openDrawer({{ json_encode($att->file_name) }}, {{ json_encode('Lampiran Dokumen #' . $document->id) }}, {{ json_encode(route('documents.attachments.preview', $att->id)) }})">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>
+                        Preview
+                      </button>
+                    @endif
+                    <button type="button" class="btn-action btn-delete" title="Hapus Lampiran" style="width:auto;padding:5px 10px;font-size:12px;gap:4px;background:#fce8e6;color:#d93025;border:none;border-radius:6px;cursor:pointer" onclick="confirmDeleteAttachment({{ $att->id }}, {{ json_encode($att->file_name) }})">
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                       Hapus
                     </button>
@@ -389,13 +397,42 @@
             </div>
           @endif
 
-          <div class="field-group">
-            <label class="field-label" for="new_attachments">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e37400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57a4 4 0 1 1 5.66 5.66l-8.59 8.58a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          {{-- Form Tambah Lampiran Baru (File & Link) --}}
+          <div class="field-group" style="background:#f8f9fa;border:1.5px solid #e8eaed;border-radius:12px;padding:18px">
+            <div style="font-size:13px;font-weight:700;color:#202124;margin-bottom:14px;display:flex;align-items:center;gap:6px">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e37400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57a4 4 0 1 1 5.66 5.66l-8.59 8.58a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
               Tambah Lampiran Baru (Opsional)
-            </label>
-            <input type="file" name="new_attachments[]" id="new_attachments" multiple class="field-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx">
-            <div class="field-hint">Anda bisa memilih beberapa file sekaligus (Maks 10MB per file)</div>
+            </div>
+
+            {{-- Opsi File --}}
+            <div style="margin-bottom:16px">
+              <label class="field-label" style="font-size:12.5px;color:#3c4043">
+                📄 Lampiran Berupa File (PDF, Word, Excel, Gambar — Maks 10MB per file)
+              </label>
+              <div id="newFileContainer" style="display:flex;flex-direction:column;gap:10px">
+                {{-- New file rows --}}
+              </div>
+
+              <button type="button" id="btnAddNewFileRow" onclick="createNewFileRow()" style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px dashed #e37400;color:#e37400;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#fffbf5'" onmouseout="this.style.background='#fff'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Tambah File Lampiran
+              </button>
+            </div>
+
+            {{-- Opsi Link --}}
+            <div style="border-top:1px dashed #dadce0;padding-top:14px">
+              <label class="field-label" style="font-size:12.5px;color:#3c4043">
+                🔗 Lampiran Berupa Link / URL (Misal Google Drive, Website, Dokumen Online)
+              </label>
+              <div id="newLinkContainer" style="display:flex;flex-direction:column;gap:10px">
+                {{-- New link rows --}}
+              </div>
+
+              <button type="button" id="btnAddNewLinkRow" onclick="createNewLinkRow()" style="margin-top:10px;display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px dashed #e37400;color:#e37400;border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#fffbf5'" onmouseout="this.style.background='#fff'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Tambah Link Lampiran
+              </button>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -421,10 +458,135 @@
 
   </div>
 
+  {{-- LEFT DRAWER FOR EDIT PAGE --}}
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <div class="drawer" id="pdfDrawer" role="dialog" aria-modal="true">
+    <div class="drawer-header">
+      <button class="drawer-close" onclick="closeDrawer()" aria-label="Tutup">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <div class="drawer-title-info">
+        <div class="drawer-doc-title" id="drawerTitle">—</div>
+        <div class="drawer-doc-sub" id="drawerSub">—</div>
+      </div>
+      <div class="drawer-header-actions">
+        <a href="#" id="drawerOpenLink" class="drawer-btn" target="_blank" rel="noopener">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Buka Penuh
+        </a>
+      </div>
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-loading" id="drawerLoading">
+        <div class="spinner-ring"></div>
+        <span>Memuat dokumen…</span>
+      </div>
+      <iframe id="pdfFrame" src="" title="Preview PDF" onload="document.getElementById('drawerLoading').classList.add('hidden')"></iframe>
+    </div>
+  </div>
+
 @endsection
 
 @push('scripts')
 <script>
+  const drawer  = document.getElementById('pdfDrawer');
+  const overlay = document.getElementById('drawerOverlay');
+  const frame   = document.getElementById('pdfFrame');
+  const loading = document.getElementById('drawerLoading');
+  const titleEl = document.getElementById('drawerTitle');
+  const subEl   = document.getElementById('drawerSub');
+  const openLink = document.getElementById('drawerOpenLink');
+
+  function openDrawer(title, sub, url, fullUrl = null) {
+    if (!drawer) return;
+    titleEl.textContent = title;
+    subEl.textContent   = sub || '—';
+    if (openLink) openLink.href = fullUrl || url;
+    if (loading) loading.classList.remove('hidden');
+    if (frame) frame.src = '';
+    drawer.classList.add('open');
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => { if (frame) frame.src = url; }, 200);
+  }
+
+  function closeDrawer() {
+    if (!drawer) return;
+    drawer.classList.remove('open');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => { if (frame) frame.src = ''; }, 350);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDrawer();
+  });
+
+  function confirmDeleteAttachment(id, name) {
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        title: 'Hapus Lampiran?',
+        text: `Apakah Anda yakin ingin menghapus lampiran "${name}"?`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d93025',
+        cancelButtonColor: '#5f6368',
+        confirmButtonText: 'Ya, Hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          document.getElementById('del-att-' + id).submit();
+        }
+      });
+    } else {
+      if (confirm(`Apakah Anda yakin ingin menghapus lampiran "${name}"?`)) {
+        document.getElementById('del-att-' + id).submit();
+      }
+    }
+  }
+
+  function createNewFileRow() {
+    const container = document.getElementById('newFileContainer');
+    if (!container) return;
+    const row = document.createElement('div');
+    row.className = 'attachment-input-row';
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 36px;gap:10px;align-items:center;background:#fff;border:1px solid #e8eaed;padding:10px;border-radius:8px';
+
+    row.innerHTML = `
+      <div>
+        <input type="file" name="new_attachments[]" class="field-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" style="font-size:13px;padding:7px 12px" required>
+      </div>
+      <button type="button" class="btn-remove-file" title="Hapus File" onclick="this.closest('.attachment-input-row').remove()" style="width:36px;height:36px;border:none;background:#fce8e6;color:#d93025;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+
+    container.appendChild(row);
+  }
+
+  function createNewLinkRow() {
+    const container = document.getElementById('newLinkContainer');
+    if (!container) return;
+    const row = document.createElement('div');
+    row.className = 'attachment-input-row';
+    row.style.cssText = 'display:grid;grid-template-columns:1fr 1.5fr 36px;gap:10px;align-items:center;background:#fff;border:1px solid #e8eaed;padding:10px;border-radius:8px';
+
+    row.innerHTML = `
+      <div>
+        <input type="text" name="new_link_titles[]" class="field-input" placeholder="Judul / Nama Link (opsional)" style="font-size:13px;padding:8px 12px">
+      </div>
+      <div>
+        <input type="url" name="new_link_urls[]" class="field-input" placeholder="URL Link (https://...)" style="font-size:13px;padding:8px 12px" required>
+      </div>
+      <button type="button" class="btn-remove-link" title="Hapus Link" onclick="this.closest('.attachment-input-row').remove()" style="width:36px;height:36px;border:none;background:#fce8e6;color:#d93025;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    `;
+
+    container.appendChild(row);
+  }
+
   // Live tag chips
   const tagsInput   = document.getElementById('tagsInput');
   const tagsPreview = document.getElementById('tagsPreview');
@@ -444,9 +606,6 @@
     if (tagsInput.value) renderTags(tagsInput.value);
   }
 
-  // Submit loading state
-  const form    = document.getElementById('editForm');
-  const btnSave = document.getElementById('btnSave');
   // Toggle mutual exclusion
   const publicToggle  = document.querySelector('input[name="is_public"]');
   const privateToggle = document.querySelector('input[name="is_private_to_uploader"]');

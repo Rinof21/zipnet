@@ -69,6 +69,8 @@ class DocumentController extends Controller
             'title' => 'required',
             'file' => 'required|mimes:pdf|max:10240',
             'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx|max:10240',
+            'link_urls.*' => 'nullable|url',
+            'link_titles.*' => 'nullable|string',
             'tanggal_surat' => 'nullable|date',
         ]);
 
@@ -94,7 +96,7 @@ class DocumentController extends Controller
             'is_private_to_uploader' => $isPrivate,
         ]);
 
-        // Process attachments
+        // Process file attachments
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $attFile) {
                 if ($attFile && $attFile->isValid()) {
@@ -106,6 +108,28 @@ class DocumentController extends Controller
                         'file_path' => $attPath,
                         'file_size' => $attFile->getSize(),
                         'file_type' => strtolower($attFile->getClientOriginalExtension()),
+                        'is_link' => false,
+                    ]);
+                }
+            }
+        }
+
+        // Process link attachments
+        if ($request->has('link_urls') && is_array($request->link_urls)) {
+            foreach ($request->link_urls as $idx => $url) {
+                $url = trim((string)$url);
+                if (!empty($url)) {
+                    $title = isset($request->link_titles[$idx]) && trim($request->link_titles[$idx]) !== ''
+                        ? trim($request->link_titles[$idx])
+                        : $url;
+
+                    $document->attachments()->create([
+                        'file_name' => $title,
+                        'file_path' => $url,
+                        'link_url' => $url,
+                        'is_link' => true,
+                        'file_type' => 'link',
+                        'file_size' => null,
                     ]);
                 }
             }
@@ -121,7 +145,7 @@ class DocumentController extends Controller
         return view('documents.show', compact('document'));
     }
 
-    public function preview(Document $document)
+    public function preview(Document $document, Request $request)
     {
         $this->authorizeDocumentAccess($document);
 
@@ -129,6 +153,14 @@ class DocumentController extends Controller
 
         if (!file_exists($filePath)) {
             abort(404, 'File tidak ditemukan');
+        }
+
+        if ($request->has('stream')) {
+            $mime = mime_content_type($filePath) ?: 'application/pdf';
+            return response()->file($filePath, [
+                'Content-Type' => $mime,
+                'Content-Disposition' => 'inline; filename="' . basename($filePath) . '"'
+            ]);
         }
 
         return view('documents.preview', compact('document'));
@@ -191,6 +223,8 @@ class DocumentController extends Controller
             'tanggal_surat' => 'nullable|date',
             'tags' => 'nullable|string',
             'new_attachments.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx|max:10240',
+            'new_link_urls.*' => 'nullable|url',
+            'new_link_titles.*' => 'nullable|string',
         ]);
 
         $isPrivate = $request->has('is_private_to_uploader') ? true : false;
@@ -207,7 +241,7 @@ class DocumentController extends Controller
             'is_private_to_uploader' => $isPrivate,
         ]);
 
-        // Process new attachments if uploaded
+        // Process new file attachments if uploaded
         if ($request->hasFile('new_attachments')) {
             foreach ($request->file('new_attachments') as $attFile) {
                 if ($attFile && $attFile->isValid()) {
@@ -219,6 +253,28 @@ class DocumentController extends Controller
                         'file_path' => $attPath,
                         'file_size' => $attFile->getSize(),
                         'file_type' => strtolower($attFile->getClientOriginalExtension()),
+                        'is_link' => false,
+                    ]);
+                }
+            }
+        }
+
+        // Process new link attachments
+        if ($request->has('new_link_urls') && is_array($request->new_link_urls)) {
+            foreach ($request->new_link_urls as $idx => $url) {
+                $url = trim((string)$url);
+                if (!empty($url)) {
+                    $title = isset($request->new_link_titles[$idx]) && trim($request->new_link_titles[$idx]) !== ''
+                        ? trim($request->new_link_titles[$idx])
+                        : $url;
+
+                    $document->attachments()->create([
+                        'file_name' => $title,
+                        'file_path' => $url,
+                        'link_url' => $url,
+                        'is_link' => true,
+                        'file_type' => 'link',
+                        'file_size' => null,
                     ]);
                 }
             }
@@ -227,10 +283,37 @@ class DocumentController extends Controller
         return redirect()->route('documents.search')->with('success', 'Dokumen berhasil diperbarui.');
     }
 
+    public function previewAttachment(DocumentAttachment $attachment)
+    {
+        $document = $attachment->document;
+        $this->authorizeDocumentAccess($document);
+
+        if ($attachment->isLink()) {
+            return redirect()->away($attachment->link_url ?: $attachment->file_path);
+        }
+
+        $filePath = storage_path('app/public/' . $attachment->file_path);
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File lampiran tidak ditemukan.');
+        }
+
+        $mime = Storage::disk('public')->mimeType($attachment->file_path) ?: 'application/pdf';
+
+        return response()->file($filePath, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="' . $attachment->file_name . '"'
+        ]);
+    }
+
     public function downloadAttachment(DocumentAttachment $attachment)
     {
         $document = $attachment->document;
         $this->authorizeDocumentAccess($document);
+
+        if ($attachment->isLink()) {
+            return redirect()->away($attachment->link_url ?: $attachment->file_path);
+        }
 
         if (!Storage::disk('public')->exists($attachment->file_path)) {
             abort(404, 'File lampiran tidak ditemukan.');
@@ -245,7 +328,7 @@ class DocumentController extends Controller
         $this->authorizeDocumentAccess($document);
         $this->authorizeDocumentEdit($document);
 
-        if (Storage::disk('public')->exists($attachment->file_path)) {
+        if (!$attachment->isLink() && Storage::disk('public')->exists($attachment->file_path)) {
             Storage::disk('public')->delete($attachment->file_path);
         }
 

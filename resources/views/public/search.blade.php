@@ -98,10 +98,10 @@
     .result-date { font-size: 12px; color: #70757a; margin-top: 4px; }
     .no-result { text-align: left; color: #4d5156; padding-top: 24px; font-size: 16px; }
 
-    /* DRAWER */
+    /* DRAWER (LEFT SIDE) */
     .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 300; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
     .drawer-overlay.active { opacity: 1; pointer-events: all; }
-    .drawer { position: fixed; top: 0; right: 0; width: min(780px, 100vw); height: 100vh; background: #fff; z-index: 400; transform: translateX(100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: -4px 0 30px rgba(0,0,0,.2); }
+    .drawer { position: fixed; top: 0; left: 0; width: min(780px, 100vw); height: 100vh; background: #fff; z-index: 400; transform: translateX(-100%); transition: transform .35s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; box-shadow: 4px 0 30px rgba(0,0,0,.2); }
     .drawer.open { transform: translateX(0); }
     .drawer-header { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid #e8eaed; flex-shrink: 0; background: #fff; }
     .drawer-close { width: 36px; height: 36px; border: none; background: transparent; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #5f6368; transition: background .15s; flex-shrink: 0; }
@@ -801,11 +801,18 @@
 
         // Attachment files
         attachments.forEach((att, i) => {
-          const attUrl = '/preview/' + docId + '?attachment_id=' + att.id;
+          const isLink = att.is_link || att.file_type === 'link' || (att.file_path && (att.file_path.startsWith('http://') || att.file_path.startsWith('https://')));
+          const attUrl = isLink ? (att.link_url || att.file_path) : ('/preview/' + docId + '?attachment_id=' + att.id);
           const attPill = document.createElement('button');
           attPill.style.cssText = 'padding:5px 12px;border-radius:16px;font-size:12px;font-weight:500;border:1px solid #dadce0;background:#fff;color:#5f6368;cursor:pointer;white-space:nowrap';
-          attPill.textContent = '📎 Lampiran ' + (i + 1) + ': ' + att.file_name;
-          attPill.onclick = () => switchPublicFile(attUrl, attPill, attUrl);
+          attPill.textContent = (isLink ? '🔗 Link: ' : ('📎 Lampiran ' + (i + 1) + ': ')) + att.file_name;
+          attPill.onclick = () => {
+            if (isLink) {
+              window.open(attUrl, '_blank');
+            } else {
+              switchPublicFile(attUrl, attPill, attUrl);
+            }
+          };
           fileSelector.appendChild(attPill);
         });
       } else {
